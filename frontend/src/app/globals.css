@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Colors */
+  --color-primary: #3b82f6;
+  --color-secondary: #6366f1;
+  --color-tertiary: #f8fafc;
+  --color-neutral: #0f172a;
+
+  /* Fonts */
+  --font-headline: "Geist", sans-serif;
+  --font-body: "Geist", sans-serif;
+  --font-label: "JetBrains Mono", monospace;
+
+  scroll-behavior: smooth;
+}
+
+/* 💡 FIX: Tell Tailwind v4 to look for the .dark class injected by next-themes */
+@variant dark (&:where(.dark, .dark *));
+
+/* 💡 FIX: Apply theme tokens based on the .dark class selector instead of media queries */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Card Flip Animation Core Mechanics */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease; /* Smooth toggle transition */
+}
+
+/* Custom global overrides for markdown structures */
+.markdown-content ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* 💡 FIX: Make sure strong markdown text adjusts to dark mode */
+.markdown-content strong {
+  font-weight: 700;
+  color: #1e293b; /* slate-800 */
+}
+.dark .markdown-content strong {
+  color: #f1f5f9; /* slate-100 */
+}
