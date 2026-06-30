@@ -112,7 +112,7 @@ export const getMyNotes = async (
   } catch (error) {
 
     res.status(500).json({
-      message: "Server Error",
+      message: error instanceof Error ? error.message : "Server Error",
     });
 
   }
@@ -156,7 +156,7 @@ export const getNoteById =
   res.status(500)
    .json({
     message:
-     "Server Error",
+      error instanceof Error ? error.message : "Server Error",
    });
 
  }
@@ -207,7 +207,7 @@ export const deleteNote = async (
     console.error(error);
 
     return res.status(500).json({
-      message: "Server Error",
+      message: error instanceof Error ? error.message : "Server Error",
     });
 
   }

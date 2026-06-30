@@ -13,36 +13,39 @@ on:
 
 jobs:
   backend:
-    runs-on: ubuntu-latest
+  runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: backend
+  defaults:
+    run:
+      working-directory: backend
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: backend/package-lock.json
 
-      - name: Install Dependencies
-        run: npm install
+    - name: Install Dependencies
+      run: npm ci
 
-      - name: Build
-        run: npm run build
+    - name: Create uploads directory
+      run: mkdir -p uploads
 
-      - name: Run Tests
-        env:
-          NODE_ENV: test
-          JWT_ACCESS_SECRET: test-access-secret
-          JWT_REFRESH_SECRET: test-refresh-secret
-          GEMINI_API_KEY: test-key
-        run: npm test
+    - name: Build
+      run: npm run build
+
+    - name: Run Tests
+      env:
+        NODE_ENV: test
+        JWT_ACCESS_SECRET: test-access-secret
+        JWT_REFRESH_SECRET: test-refresh-secret
+        GEMINI_API_KEY: test-key
+      run: npm test
 
   frontend:
     runs-on: ubuntu-latest
