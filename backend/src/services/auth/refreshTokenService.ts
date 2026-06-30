@@ -53,19 +53,23 @@ export const rotateRefreshToken = async (incomingRefreshToken: string) => {
   // 🚨 ROTATION CRITICAL ATOMIC REWRITE
   // 💡 FIXED: Replaced .save() with an atomic multi-operator update.
   // This pulls the old hash and pushes the new hash concurrently without touching Mongoose versioning tags!
-  const updatedUser = await User.findOneAndUpdate(
-    { _id: user._id, refreshTokens: matchedHash }, // Ensure token wasn't already rotated by a parallel request
+
+  const newRefreshTokens=user.refreshTokens
+  .filter(token => token !== matchedHash)
+  .concat(hashedRefreshToken);
+
+  const updatedUser = await User.findByIdAndUpdate(
+    user._id,
     {
-      $pull: { refreshTokens: matchedHash },
-      $push: { refreshTokens: hashedRefreshToken },
+      $set: { refreshTokens: newRefreshTokens, },
     },
-    { new: true } // Return the freshly updated document state
+    { returnDocument: "after"} // Return the freshly updated document state
   );
 
   // 💡 Handshake Safety Fallback:
   // If updatedUser returns null, it means a parallel request already pulled "matchedHash" from the array
   if (!updatedUser) {
-    throw new AuthError(401, "Session concurrency collision. Please try again.");
+    throw new AuthError(401, "Session Expired");
   }
 
   return {
