@@ -1,14 +1,15 @@
-// --- COOKIE CONFIGURATION OPTIMIZATIONS ---
+const isProduction = process.env.NODE_ENV === "production";
+
 export const COOKIE_OPTIONS_ACCESS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
-  maxAge: 15 * 60 * 1000, // 15 Minutes
+  secure: isProduction,
+  sameSite: isProduction ? ("none" as const) : ("lax" as const),
+  maxAge: 15 * 60 * 1000,
 };
 
 export const COOKIE_OPTIONS_REFRESH = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict" as const,
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Days
+  secure: isProduction,
+  sameSite: isProduction ? ("none" as const) : ("lax" as const),
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
