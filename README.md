@@ -313,35 +313,34 @@ GitHub Actions automatically
 ## Landing Page
 
 <img width="1901" height="852" alt="landing_page" src="https://github.com/user-attachments/assets/745e5666-5a55-44e4-84d8-c71320db1371" />
-<img width="1901" height="852" alt="landing_page" src="https://github.com/user-attachments/assets/745e5666-5a55-44e4-84d8-c71320db1371" />
+
 
 ---
 
 ## Dashboard
 
-<img width="1918" height="866" alt="dashboard" src="https://github.com/user-attachments/assets/c25749cb-181b-4dc2-aa5c-5831af6b86af" />
-<img width="1918" height="866" alt="dashboard" src="https://github.com/user-attachments/assets/c25749cb-181b-4dc2-aa5c-5831af6b86af" />
+<img width="1901" height="858" alt="dashboard" src="https://github.com/user-attachments/assets/e73b328a-7193-413e-b225-92f4e4f4d52f" />
 
 ---
 
 ## Chat
 
 <img width="1912" height="875" alt="chat" src="https://github.com/user-attachments/assets/3a197bea-1217-461d-a8ee-6d6fd1924dc5" />
-<img width="1912" height="875" alt="chat" src="https://github.com/user-attachments/assets/3a197bea-1217-461d-a8ee-6d6fd1924dc5" />
+
 
 ---
 
 ## Flashcards
 
 <img width="1913" height="856" alt="flashcards" src="https://github.com/user-attachments/assets/14d626f2-ea85-4629-924c-f0a2ad40dd68" />
-<img width="1913" height="856" alt="flashcards" src="https://github.com/user-attachments/assets/14d626f2-ea85-4629-924c-f0a2ad40dd68" />
+
 
 ---
 
 ## Quiz
 
 <img width="1917" height="863" alt="quiz" src="https://github.com/user-attachments/assets/5ce36278-ceff-4350-a4db-a3a8751e5e23" />
-<img width="1917" height="863" alt="quiz" src="https://github.com/user-attachments/assets/5ce36278-ceff-4350-a4db-a3a8751e5e23" />
+
 
 ---
 
