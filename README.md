@@ -1,3 +1,5 @@
+[![Student Copilot CI](https://github.com/Vishalnerd/student-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/Vishalnerd/student-copilot/actions/workflows/ci.yml)
+
 # 🎓 Student Copilot
 
 An AI-powered study assistant that transforms PDF notes into interactive learning experiences using **RAG (Retrieval-Augmented Generation)**, **Google Gemini AI**, and **MongoDB Vector Search**.
