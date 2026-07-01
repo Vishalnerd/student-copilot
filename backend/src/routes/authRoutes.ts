@@ -2,6 +2,7 @@ import express
 from "express";
 
 import { registerUser,loginUser, getUserProfile,refreshToken,logoutUser } from "../controllers/authController";
+import { googleLogin } from "../controllers/googleAuthController";
 import {protect} from "../middleware/authMiddleware";
 import {authLimiter}  from "../middleware/rateLimiter";
 
@@ -28,6 +29,13 @@ router.post(
     "/login",
     authLimiter,
      loginUser);
+
+/**
+ * @route POST /api/auth/google
+ * @desc Login or register user using Google OAuth
+ * @access Public
+ */
+router.post("/google", googleLogin);
 /**
  * @route POST /api/auth/refresh-token
  * @desc Refresh access token using refresh token
@@ -52,5 +60,7 @@ router.post(
 router.get("/profile",
     protect,
     getUserProfile);
+
+
 
 export default router;

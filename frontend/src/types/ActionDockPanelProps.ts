@@ -8,4 +8,5 @@ export interface ActionDockPanelProps {
   loadingSummary: boolean;
   loadingFlashcards: boolean;
   viewMode: "chat" | "flashcards";
+  disabled: boolean; // 💡 Added to manage button states during async operations
 }

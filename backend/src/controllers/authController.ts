@@ -37,6 +37,7 @@ export const registerUser = async (req: AuthRequest, res: Response) => {
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
+      provider: "local",
     });
 
     // Generate token pairs
@@ -82,15 +83,33 @@ export const loginUser = async (req: AuthRequest, res: Response) => {
     }
     const { email, password } = result.data;
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    const user = await User.findOne({
+  email: email.toLowerCase().trim(),
+});
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+if (!user) {
+  return res.status(400).json({
+    message: "Invalid credentials",
+  });
+}
+
+// Google-only account
+if (!user.password) {
+  return res.status(400).json({
+    message: "This account uses Google Sign-In. Please continue with Google.",
+  });
+}
+
+const isMatch = await bcrypt.compare(
+  password,
+  user.password
+);
+
+if (!isMatch) {
+  return res.status(400).json({
+    message: "Invalid credentials",
+  });
+}
 
     const accessToken = generateAccessToken(user._id.toString());
     const refreshToken = generateRefreshToken(user._id.toString());

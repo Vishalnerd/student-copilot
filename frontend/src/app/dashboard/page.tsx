@@ -81,7 +81,7 @@ export default function Dashboard() {
                       "{randomQuote}" You've mastered{" "}
                       {dashboard?.totalFlashcards
                         ? Math.round(dashboard.totalFlashcards * 0.3)
-                        : 15}{" "}
+                        : 0}{" "}
                       new concepts this week. Ready to study?
                     </p>
                     <div className="flex gap-3">
@@ -105,7 +105,7 @@ export default function Dashboard() {
                         icon={FileText}
                         label="Total Notes"
                         value={dashboard.totalNotes}
-                        badge="+4 this week"
+                        badge={`${dashboard.totalNotes} today`}
                         badgeColor="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40"
                         iconBg="bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
                       />
@@ -113,7 +113,7 @@ export default function Dashboard() {
                         icon={MessageSquare}
                         label="AI Questions"
                         value={dashboard.totalQuestions}
-                        badge="+12 today"
+                        badge={`${dashboard.totalQuestions} today`}
                         badgeColor="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40"
                         iconBg="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400"
                       />
@@ -121,7 +121,7 @@ export default function Dashboard() {
                         icon={Layers}
                         label="Flashcards"
                         value={dashboard?.totalFlashcards || 0}
-                        badge="Active Decks"
+                        badge={`${dashboard?.totalFlashcards || 0} active`}
                         badgeColor="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/40"
                         iconBg="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                       />
@@ -129,7 +129,7 @@ export default function Dashboard() {
                         icon={ClipboardCheck}
                         label="Quizzes"
                         value={dashboard?.totalQuizzes || 0}
-                        badge="Review Mode ready"
+                        badge={`${dashboard?.totalQuizzes || 0} available`}
                         badgeColor="bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-900/40"
                         iconBg="bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400"
                       />

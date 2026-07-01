@@ -42,6 +42,10 @@ export default function UploadPage() {
       toast.error("Only PDF files allowed");
       return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size exceeds 5MB limit");
+      return;
+    }
     try {
       setLoading(true);
       await uploadNote(file);

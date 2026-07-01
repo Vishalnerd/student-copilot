@@ -44,6 +44,9 @@ export default function NoteDetailsPage() {
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [loadingFlashcards, setLoadingFlashcards] = useState(false);
 
+  // 💡 NEW: Centralized processing flag to lock all interactive pathways uniformly
+  const isProcessing = askingQuestion || loadingSummary || loadingFlashcards;
+
   useEffect(() => {
     const fetchNoteAndHistory = async () => {
       if (!params.id) return;
@@ -59,7 +62,7 @@ export default function NoteDetailsPage() {
             {
               _id: "welcome",
               isWelcome: true,
-              answer: `Hello! I've analyzed **${noteData.fileName}**. This document focuses heavily on process scheduling, deadlocks, and virtual memory. How can I help you study today?`,
+              answer: `Hello! I've analyzed **${noteData.fileName}**. How can I help you study today?`,
             },
           ]);
         } else {
@@ -83,7 +86,7 @@ export default function NoteDetailsPage() {
   }, [chats, askingQuestion, viewMode]);
 
   const handleAsk = async () => {
-    if (!question.trim() || !note) return;
+    if (!question.trim() || !note || isProcessing) return;
 
     const userPrompt = question.trim();
     setQuestion("");
@@ -112,7 +115,7 @@ export default function NoteDetailsPage() {
   };
 
   const handleSummary = async () => {
-    if (!note) return;
+    if (!note || isProcessing) return;
     setLoadingSummary(true);
     setViewMode("chat");
 
@@ -138,7 +141,7 @@ export default function NoteDetailsPage() {
   };
 
   const handleGenerateFlashcards = async () => {
-    if (!note) return;
+    if (!note || isProcessing) return;
     setLoadingFlashcards(true);
     setViewMode("flashcards");
 
@@ -238,8 +241,9 @@ export default function NoteDetailsPage() {
           <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 px-6 py-3.5 flex items-center justify-between transition-colors duration-200">
             <div className="flex items-center gap-4">
               <button
+                disabled={isProcessing} // 💡 Prevent leaving the workspace while async calls are running
                 onClick={() => router.push("/notes")}
-                className="p-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 border border-gray-100 dark:border-gray-800 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100 transition cursor-pointer"
+                className="p-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 border border-gray-100 dark:border-gray-800 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100 transition cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
@@ -251,8 +255,9 @@ export default function NoteDetailsPage() {
             {/* View Mode Tabs Selector Wrapper */}
             <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex items-center border border-slate-200/40 dark:border-gray-700/60 shadow-inner">
               <button
+                disabled={isProcessing}
                 onClick={() => setViewMode("chat")}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                   viewMode === "chat"
                     ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 shadow-2xs border border-gray-200/50 dark:border-gray-600/30"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100"
@@ -262,6 +267,7 @@ export default function NoteDetailsPage() {
                 AI Copilot
               </button>
               <button
+                disabled={isProcessing}
                 onClick={() => {
                   if (flashcards.length === 0 && !loadingFlashcards) {
                     handleGenerateFlashcards();
@@ -269,7 +275,7 @@ export default function NoteDetailsPage() {
                     setViewMode("flashcards");
                   }
                 }}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                   viewMode === "flashcards"
                     ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-2xs border border-gray-200/50 dark:border-gray-600/30"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100"
@@ -288,7 +294,6 @@ export default function NoteDetailsPage() {
 
           {/* Workspace Body Grid */}
           <div className="flex-1 flex overflow-hidden">
-            {/* Ensure your ExtractedTextSidebar component handles inner dark:bg adjustments */}
             <ExtractedTextSidebar content={note.content} />
 
             <div className="flex-1 flex flex-col bg-slate-50/30 dark:bg-slate-900/20 overflow-hidden transition-colors duration-200">
@@ -312,7 +317,9 @@ export default function NoteDetailsPage() {
                   )}
                 </div>
               ) : (
+                /* 💡 FIXED: Disabled input/interaction behaviors here during any active processing state */
                 <ChatTerminal
+                  disabledInput={isProcessing}
                   chats={chats}
                   chatEndRef={chatEndRef}
                   handleCopy={handleCopy}
@@ -320,6 +327,7 @@ export default function NoteDetailsPage() {
               )}
 
               {/* Bottom Input Dock Panel */}
+              {/* 💡 FIXED: Propagated unified flags down to stop double-triggering across actions */}
               <ActionDockPanel
                 question={question}
                 setQuestion={setQuestion}
@@ -330,6 +338,7 @@ export default function NoteDetailsPage() {
                 loadingSummary={loadingSummary}
                 loadingFlashcards={loadingFlashcards}
                 viewMode={viewMode}
+                disabled={isProcessing} // Make sure your ActionDockPanel component accepts a `disabled` prop to lock down text fields and buttons!
               />
             </div>
           </div>

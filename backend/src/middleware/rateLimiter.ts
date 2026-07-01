@@ -1,6 +1,7 @@
-import {rateLimit} from "express-rate-limit";
+import  {rateLimit} from "express-rate-limit";
 
- const authLimiter = rateLimit({
+ const authLimiter = 
+    process.env.NODE_ENV==="test"?(_req:any,_res:any,next:any)=>next(): rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
 
   max: Number(process.env.AUTH_RATE_LIMIT), // Limit each IP to 5 requests per windowMs
@@ -15,7 +16,7 @@ import {rateLimit} from "express-rate-limit";
   legacyHeaders: false,
 });
 
- const aiLimiter = rateLimit({
+ const aiLimiter = process.env.NODE_ENV==="test"?(_req:any,_res:any,next:any)=>next(): rateLimit({
 
     windowMs:
     60*1000,
@@ -29,8 +30,7 @@ import {rateLimit} from "express-rate-limit";
 
 });
 
-const apiLimiter =
-    rateLimit({
+const apiLimiter = process.env.NODE_ENV==="test"?(_req:any,_res:any,next:any)=>next(): rateLimit({
     windowMs:
     60*1000,
 

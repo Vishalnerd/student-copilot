@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useState, useEffect, ReactNode } from "react";
+import { loginUser, googleLogin, registerUser } from "@/services/authApi";
 import { api } from "@/lib/axios";
 
 interface UserProfile {
@@ -11,10 +12,22 @@ interface UserProfile {
 
 interface AuthContextType {
   user: UserProfile | null;
-  setUser: (user: UserProfile | null) => void;
   loading: boolean;
-  login: (userData: UserProfile) => void;
+
+  login: (user: UserProfile) => void;
+
+  loginWithPassword: (email: string, password: string) => Promise<void>;
+
+  registerWithPassword: (
+    name: string,
+    email: string,
+    password: string,
+  ) => Promise<void>;
+
+  loginWithGoogle: (credential: string) => Promise<void>;
+
   logout: () => Promise<void>;
+
   checkAuthStatus: () => Promise<void>;
 }
 
@@ -43,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       const response = await api.get("/auth/profile");
       if (response.data) {
-        setUser(response.data);
+        login(response.data);
       } else {
         setUser(null);
       }
@@ -68,6 +81,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false); // Safeguard: visually seals authentication checks as completed
   };
 
+  const loginWithPassword = async (email: string, password: string) => {
+    const response = await loginUser(email.toLowerCase().trim(), password);
+
+    login(response.user);
+  };
+
+  const registerWithPassword = async (
+    name: string,
+    email: string,
+    password: string,
+  ) => {
+    const response = await registerUser(
+      name.trim(),
+      email.toLowerCase().trim(),
+      password,
+    );
+    login(response.user);
+  };
+
+  const loginWithGoogle = async (credential: string) => {
+    const response = await googleLogin(credential);
+
+    login(response.user);
+  };
+
   /**
    * 🛑 Production Logout Cleanup Hook
    * Triggers the backend cookie flushing sequence and safely empties context memory spaces.
@@ -89,7 +127,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, setUser, loading, login, logout, checkAuthStatus }}
+      value={{
+        user,
+        loading,
+
+        login,
+
+        registerWithPassword,
+        loginWithPassword,
+        loginWithGoogle,
+
+        logout,
+        checkAuthStatus,
+      }}
     >
       {children}
     </AuthContext.Provider>

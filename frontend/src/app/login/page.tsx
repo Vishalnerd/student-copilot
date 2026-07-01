@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { loginUser } from "@/services/authApi";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../hooks/useAuth";
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import {
@@ -24,7 +24,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   // 💡 Pull context handles from your cookie-driven AuthContext
-  const { user, login, loading: authLoading } = useAuth();
+  const {
+    loginWithPassword,
+    loginWithGoogle,
+    user,
+    loading: authLoading,
+  } = useAuth();
+
   const router = useRouter();
 
   // 🛡️ SECURITY GUARD: If the user is already authenticated, redirect them automatically
@@ -44,28 +50,29 @@ export default function LoginPage() {
 
       setLoading(true);
 
-      // 1. Hit the Express backend API. Cookies (accessToken/refreshToken) are set via HTTP headers.
-      const response = await loginUser(email.toLowerCase().trim(), password);
+      await loginWithPassword(email, password);
 
-      if (!response || !response.user) {
-        throw new Error("Invalid session metadata returned from auth gateway");
-      }
+      toast.success("Welcome back!");
 
-      // 2. 💡 FIX: Sync the user profile payload directly to the React state tree context
-      login(response.user);
-
-      toast.success(`Welcome back, ${response.user.name}!`);
-
-      // 3. Clear routing history traces by using replace instead of push
       router.replace("/dashboard");
     } catch (error: any) {
-      console.error("Login Submission Fault:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          "Invalid email credentials or password",
-      );
+      toast.error(error?.response?.data?.message ?? "Invalid credentials");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) return;
+
+    try {
+      await loginWithGoogle(credentialResponse.credential);
+
+      toast.success("Welcome!");
+
+      router.replace("/dashboard");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message ?? "Google login failed");
     }
   };
 
@@ -190,19 +197,19 @@ export default function LoginPage() {
             <div className="flex-grow border-t border-gray-100"></div>
           </div>
 
-          {/* OAuth Mock placeholder */}
-          <button
-            type="button"
-            className="w-full border border-gray-200 hover:bg-slate-50 font-bold text-sm py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-gray-700 cursor-pointer shadow-2xs"
-          >
-            <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-              <path
-                fill="#EA4335"
-                d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.866-3.577-7.866-8s3.536-8 7.866-8c2.46 0 4.105 1.025 5.047 1.926l3.227-3.227C18.415 1.143 15.624 0 12.24 0 5.58 0 0 5.37 0 12s5.58 12 12.24 12c6.96 0 11.57-4.854 11.57-11.77 0-.795-.085-1.4-.195-1.945H12.24z"
-              />
-            </svg>
-            Continue with Google
-          </button>
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              onError={() => {
+                toast.error("Google Login Failed");
+              }}
+              theme="outline"
+              size="large"
+              text="continue_with"
+              shape="pill"
+              width="340"
+            />
+          </div>
         </div>
 
         <p className="text-center text-xs font-medium text-gray-500 mt-6">
