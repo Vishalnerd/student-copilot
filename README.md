@@ -684,9 +684,9 @@ GitHub Actions automatically
 
 ## Dashboard
 
-<div align="center>
-    <img src="/frontend/public/dashboard.png" alt="Dashboard Screenshot" />
-</div>
+<img width="1901" height="858" alt="dashboard" src="https://github.com/user-attachments/assets/91d8d7e1-ee8e-4263-821b-0be9bcd0cbd4" />
+
+
 ---
 
 ## Chat
