@@ -5,6 +5,7 @@ import { getMyNotes, deleteNote, searchNotes } from "@/services/noteApi";
 import { Note } from "../../types/note";
 import Navbar from "@/app/components/layout/Navbar";
 import Sidebar from "@/app/components/layout/Sidebar";
+import MobileSidebar from "@/app/components/layout/MobileSIdebar"; // Casing matched with your layout folder
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -17,6 +18,7 @@ import {
   FolderOpen,
   Search,
   X,
+  Menu, // Imported for the mobile menu trigger action
 } from "lucide-react";
 
 export default function NotesPage() {
@@ -93,17 +95,28 @@ export default function NotesPage() {
   return (
     <ProtectedRoute>
       {/* 💡 Upgraded background container using v4 semantic design tokens */}
-      <div className="flex h-screen overflow-hidden bg-background text-foreground transition-colors duration-200">
+      <div className="flex min-h-screen bg-background text-foreground transition-colors duration-200">
         <Sidebar />
 
-        {/* 💡 Fluid canvas shell handling dark-mode background blend filters */}
-        <div className="flex-1 ml-64 flex flex-col bg-slate-50 dark:bg-slate-900/40 overflow-y-auto min-h-screen transition-colors duration-200">
-          <Navbar />
+        {/* 💡 Fluid canvas shell handling dark-mode background blend filters and responsive width alignments */}
+        <div className="flex flex-1 flex-col bg-slate-50 dark:bg-slate-900/40 transition-colors duration-200 ml-0 lg:ml-64">
+          {/* Connected Navbar containing the responsive MobileSidebar Primitive Trigger */}
+          <Navbar
+            mobileMenuTrigger={
+              <MobileSidebar
+                trigger={
+                  <button className="lg:hidden p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition focus:outline-none">
+                    <Menu className="h-5 w-5" />
+                  </button>
+                }
+              />
+            }
+          />
 
-          <main className="p-8 max-w-7xl mx-auto w-full">
+          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
             <div className="space-y-6">
               {/* Integrated Modern Search Bar Box Container */}
-              <div className="relative max-w-xl w-full">
+              <div className="relative w-full max-w-xl">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
@@ -125,9 +138,9 @@ export default function NotesPage() {
               </div>
 
               {/* Title Header Section */}
-              <div className="flex items-start justify-between gap-6 pt-2">
+              <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100 tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl font-bold">
                     {search.trim() !== "" ? "Search Results" : "My Notes"}
                   </h1>
                   <p className="mt-1 text-gray-500 dark:text-gray-400 text-sm">
@@ -139,7 +152,7 @@ export default function NotesPage() {
 
                 <Link
                   href="/upload"
-                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition cursor-pointer"
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
                 >
                   <Plus className="w-4 h-4 stroke-[2.5]" />
                   New Note
@@ -148,7 +161,7 @@ export default function NotesPage() {
 
               {/* View Output Layer */}
               {loading ? (
-                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {[1, 2, 3].map((item) => (
                     <div
                       key={item}
@@ -183,7 +196,7 @@ export default function NotesPage() {
                 </div>
               ) : (
                 /* Active Notes Card Layout Grid */
-                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {notes.map((note) => {
                     const { Icon, bg } = getFileIconConfig(note.fileName);
                     const chatCount = (note as any).chatCount ?? 0;
@@ -191,7 +204,7 @@ export default function NotesPage() {
                     return (
                       <article
                         key={note._id}
-                        className="group rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800/80 p-5 transition hover:-translate-y-0.5 hover:shadow-md dark:hover:border-blue-500/40 flex flex-col justify-between"
+                        className="group rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800/80 p-4 sm:p-5 transition hover:-translate-y-0.5 hover:shadow-md dark:hover:border-blue-500/40 flex flex-col justify-between"
                       >
                         <div>
                           <div className="mb-4 flex items-start justify-between">
@@ -227,14 +240,13 @@ export default function NotesPage() {
                         </div>
 
                         {/* Bottom Action Section Container */}
-                        <div className="mt-6 flex items-center justify-between border-t border-gray-100 dark:border-gray-700/60 pt-4">
+                        <div className="mt-5 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-700/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
                           <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 font-medium">
                             <MessageSquare className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                             <span>{chatCount} Chats</span>
                           </div>
 
                           <div className="flex items-center gap-2">
-                            {/* 💡 FIXED: added stopPropagation to prevent parent card event fires */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -248,7 +260,7 @@ export default function NotesPage() {
 
                             <Link
                               href={`/notes/${note._id}`}
-                              className="rounded-xl bg-blue-50 dark:bg-blue-950/40 px-4 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 border border-blue-100/30 dark:border-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition cursor-pointer"
+                              className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 px-4 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 border border-blue-100/30 dark:border-blue-900/20 transition hover:bg-blue-100 dark:hover:bg-blue-900/40"
                             >
                               Open
                             </Link>

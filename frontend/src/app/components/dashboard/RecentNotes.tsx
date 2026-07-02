@@ -20,21 +20,23 @@ export default function RecentNotes({ notes }: RecentNotesProps) {
   const router = useRouter();
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-2xs transition-colors duration-200">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-4 sm:p-6 shadow-2xs transition-colors duration-200">
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-slate-100">
           Recent Notes
         </h3>
+
         <Link
           href="/notes"
-          className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:text-blue-700 dark:hover:text-blue-300"
+          className="flex-shrink-0 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         >
           View all
         </Link>
       </div>
 
       {notes.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-400 text-center py-8 text-sm">
+        <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
           No notes yet
         </p>
       ) : (
@@ -42,60 +44,62 @@ export default function RecentNotes({ notes }: RecentNotesProps) {
           {notes.map((note) => (
             <div
               key={note._id}
-              /* 💡 FIXED: Outer card is now a semantic div with an onClick route action */
               onClick={() => router.push(`/notes/${note._id}`)}
-              className="border border-gray-200 dark:border-gray-700/70 rounded-xl p-4 hover:border-blue-200 dark:hover:border-blue-500/40 hover:bg-blue-50/10 dark:hover:bg-blue-950/10 transition flex items-start justify-between group cursor-pointer"
+              className="group flex flex-col gap-4 rounded-xl border border-gray-200 dark:border-gray-700/70 p-4 transition hover:border-blue-200 hover:bg-blue-50/10 dark:hover:border-blue-500/40 dark:hover:bg-blue-950/10 sm:flex-row sm:items-start sm:justify-between cursor-pointer"
             >
-              <div className="flex items-start gap-4 flex-1 min-w-0">
-                <div className="w-10 h-10 bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5" />
+              <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400">
+                  <FileText className="h-5 w-5" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400">
                     {note.fileName}
                   </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+
+                  <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                     Modified {new Date(note.createdAt).toLocaleDateString()} •
                     12MB
                   </p>
 
-                  {/* Inline Option Utility Triggers */}
-                  {/* 💡 e.stopPropagation() prevents the parent div's onClick from triggering when clicking specific buttons */}
+                  {/* Action Buttons */}
                   <div
-                    className="flex gap-2 mt-3"
+                    className="mt-3 flex flex-wrap gap-2"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Link
                       href={`/notes/${note._id}`}
-                      className="text-xs bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg transition font-semibold flex items-center gap-1 cursor-pointer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-700/60 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-700"
                     >
-                      <MessageSquare className="w-3 h-3 text-blue-500" />
+                      <MessageSquare className="h-3 w-3 text-blue-500" />
                       Chat
                     </Link>
+
                     <Link
                       href="/flashcards"
-                      className="text-xs bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg transition font-semibold flex items-center gap-1 cursor-pointer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-700/60 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-700"
                     >
-                      <Brain className="w-3 h-3 text-violet-500" />
+                      <Brain className="h-3 w-3 text-violet-500" />
                       Study
                     </Link>
+
                     <Link
                       href="/quizzes"
-                      className="text-xs bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg transition font-semibold flex items-center gap-1 cursor-pointer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-700/60 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-700"
                     >
-                      <Clipboard className="w-3 h-3 text-emerald-500" />
+                      <Clipboard className="h-3 w-3 text-emerald-500" />
                       Quiz
                     </Link>
                   </div>
                 </div>
               </div>
 
-              {/* 💡 Option Menu Button */}
+              {/* More Button */}
               <button
                 onClick={(e) => e.stopPropagation()}
-                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition cursor-pointer self-start -mt-1 -mr-1"
+                className="self-end sm:self-start rounded-lg p-1.5 text-gray-400 transition hover:bg-slate-100 hover:text-gray-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
               >
-                <MoreVertical className="w-4 h-4" />
+                <MoreVertical className="h-4 w-4" />
               </button>
             </div>
           ))}
@@ -104,9 +108,9 @@ export default function RecentNotes({ notes }: RecentNotesProps) {
 
       <Link
         href="/upload"
-        className="w-full mt-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-slate-900 transition flex items-center justify-center gap-2 text-xs font-bold shadow-3xs cursor-pointer"
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm sm:text-xs font-bold text-gray-700 transition hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-slate-900 shadow-3xs"
       >
-        <Plus className="w-4 h-4 text-gray-400" />
+        <Plus className="h-4 w-4 text-gray-400" />
         Upload More
       </Link>
     </div>

@@ -6,53 +6,52 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sun, Moon } from "lucide-react";
 
-export default function Navbar() {
+// Define the interface to accept the sheet primitive trigger slot
+interface NavbarProps {
+  mobileMenuTrigger?: React.ReactNode;
+}
+
+export default function Navbar({ mobileMenuTrigger }: NavbarProps) {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // 💡 Prevent theme icon flickering on initial page boot hydration
   useEffect(() => {
     setMounted(true);
   }, []);
 
   return (
-    <nav className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800 px-8 py-4 sticky top-0 z-30 transition-colors duration-200">
-      {/* Main container spanning the full width */}
-      <div className="flex items-center w-full gap-6">
-        {/* Left side spacer - allows the page search bar or alignment to look proportional */}
-        <div className="flex-1" />
+    <nav className="sticky top-0 z-30 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 transition-colors duration-200">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Left Actions / Mobile Trigger Slot */}
+        <div className="flex-1 flex items-center">
+          {/* 📱 Render the sheet component trigger on viewports below 'lg' */}
+          <div className="lg:hidden">{mobileMenuTrigger}</div>
+        </div>
 
-        {/* Right side utilities and profile */}
-        <div className="flex items-center gap-4">
-          {/* Theme Toggle Button */}
+        {/* Right Actions */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Theme Toggle */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100 transition cursor-pointer"
-            aria-label="Toggle structural layout theme"
+            className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            aria-label="Toggle theme"
           >
             {!mounted ? (
-              // Empty skeleton slot to reserve spacing layout bounds before mounting
-              <div className="w-5 h-5" />
+              <div className="h-5 w-5" />
             ) : theme === "dark" ? (
-              <Sun className="w-5 h-5 text-amber-400 animate-in fade-in zoom-in-75 duration-200" />
+              <Sun className="h-5 w-5 text-amber-400 animate-in fade-in zoom-in-75 duration-200" />
             ) : (
-              <Moon className="w-5 h-5 text-slate-700 animate-in fade-in zoom-in-75 duration-200" />
+              <Moon className="h-5 w-5 text-slate-700 animate-in fade-in zoom-in-75 duration-200" />
             )}
           </button>
 
-          {/* Right side user component wrapper */}
           {user && (
-            <Link
-              href="/profile"
-              className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-800 group"
-            >
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-gray-900 dark:text-slate-100 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
-                  {user.name}
-                </p>
-              </div>
-            </Link>
+            <div className="text-right">
+              <p className="max-w-[120px] truncate text-sm font-bold leading-tight text-gray-900 transition group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400 sm:max-w-none">
+                {user.name}
+              </p>
+            </div>
           )}
         </div>
       </div>

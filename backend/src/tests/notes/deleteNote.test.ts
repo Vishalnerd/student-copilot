@@ -2,7 +2,7 @@ import request from "supertest";
 import bcrypt from "bcryptjs";
 import fs from "fs";
 
-import app from "../../server";
+import app from "../../app";
 
 import User from "../../models/user";
 import Note from "../../models/note";

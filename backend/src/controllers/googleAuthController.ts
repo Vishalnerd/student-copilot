@@ -97,7 +97,7 @@ await User.findByIdAndUpdate(
       refreshTokens: hashedToken,
     },
   },
-  {new: true}
+  {returnDocument: "after"}
 );
 
 await user.save();

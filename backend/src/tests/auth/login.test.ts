@@ -1,7 +1,7 @@
 import request from "supertest";
 import bcrypt from "bcryptjs";
 
-import app from "../../server";
+import app from "../../app";
 import User from "../../models/user";
 import { createUser } from "../helpers/createUser";
 

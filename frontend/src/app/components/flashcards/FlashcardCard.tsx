@@ -18,65 +18,65 @@ export default function FlashcardCard({
 
   return (
     <div className="w-full max-w-xl mx-auto space-y-4 select-none">
-      {/* 3D Animation Container Workspace */}
+      {/* Flashcard */}
       <div
         onClick={() => setIsFlipped(!isFlipped)}
-        className="w-full h-64 perspective-1000 cursor-pointer group"
+        className="group w-full h-[280px] sm:h-72 perspective-1000 cursor-pointer"
       >
         <div
-          className={`w-full h-full duration-500 transform-style-3d relative ${
+          className={`relative h-full w-full transform-style-3d duration-500 ${
             isFlipped ? "rotate-y-180" : ""
           }`}
         >
-          {/* FRONT SIDE: Question View */}
-          {/* 💡 FIXED: Converted static white frame to toggle fluidly into deep slate grids */}
-          <div className="absolute inset-0 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-800 rounded-2xl p-8 flex flex-col justify-between shadow-2xs backface-hidden group-hover:border-gray-300 dark:group-hover:border-gray-700 transition-colors duration-200">
-            <div className="space-y-2">
-              <span className="text-[10px] font-mono font-bold tracking-wider text-blue-600 dark:text-blue-400 uppercase">
+          {/* FRONT */}
+          <div className="absolute inset-0 flex flex-col justify-between rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-5 sm:p-8 shadow-2xs backface-hidden transition-colors duration-200 group-hover:border-gray-300 dark:group-hover:border-gray-700">
+            <div className="space-y-2 overflow-y-auto">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                 Question
               </span>
-              {/* 💡 FIXED: Injected prose dark parameters to parse question markdown patterns perfectly */}
-              <div className="text-gray-900 dark:text-slate-100 font-bold text-lg md:text-xl leading-relaxed prose prose-sm dark:prose-invert">
+
+              <div className="prose prose-sm dark:prose-invert max-w-none text-base sm:text-lg md:text-xl font-bold leading-relaxed text-gray-900 dark:text-slate-100">
                 <ReactMarkdown>{flashcard.question}</ReactMarkdown>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500 self-center">
-              <RefreshCw className="w-3.5 h-3.5" />
-              Click card to flip
+
+            <div className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs font-semibold text-gray-400 dark:text-gray-500">
+              <RefreshCw className="h-3.5 w-3.5 flex-shrink-0" />
+              <span>Tap card to flip</span>
             </div>
           </div>
 
-          {/* BACK SIDE: Answer View */}
-          {/* 💡 FIXED: Preserved high contrast dark styling frame while syncing typography matching v4 rules */}
-          <div className="absolute inset-0 bg-slate-900 dark:bg-slate-950 border border-slate-800 text-white rounded-2xl p-8 flex flex-col justify-between shadow-md rotate-y-180 backface-hidden transition-colors duration-200">
-            <div className="space-y-2 overflow-y-auto max-h-[160px] pr-2 scrollbar-thin">
-              <span className="text-[10px] font-mono font-bold tracking-wider text-blue-400 uppercase">
+          {/* BACK */}
+          <div className="absolute inset-0 flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900 dark:bg-slate-950 p-5 sm:p-8 text-white shadow-md rotate-y-180 backface-hidden transition-colors duration-200">
+            <div className="max-h-[170px] sm:max-h-[180px] overflow-y-auto pr-2 scrollbar-thin space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-400">
                 Answer Summary
               </span>
-              <div className="text-slate-100 dark:text-slate-200 text-base md:text-lg leading-relaxed font-medium prose prose-invert prose-sm">
+
+              <div className="prose prose-sm prose-invert max-w-none text-sm sm:text-base md:text-lg font-medium leading-relaxed text-slate-100 dark:text-slate-200">
                 <ReactMarkdown>{flashcard.answer}</ReactMarkdown>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 dark:text-gray-500 self-center">
-              <RefreshCw className="w-3.5 h-3.5 text-blue-400" />
-              Click card to flip front
+
+            <div className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs font-semibold text-slate-400">
+              <RefreshCw className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
+              <span>Tap card to flip back</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Verification Quality Metric Action Deck */}
+      {/* Action Buttons */}
       {onStatusAction && (
-        /* 💡 FIXED: Replaced default opacity transitions with native Tailwind v4 animation attributes */
-        <div className="flex items-center justify-center gap-3 animate-in fade-in duration-200">
+        <div className="animate-in fade-in duration-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
           <button
             onClick={() => {
               setIsFlipped(false);
               onStatusAction(flashcard._id, false);
             }}
-            className="inline-flex items-center gap-2 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 font-bold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/30 px-4 py-3 text-xs font-bold text-rose-600 transition hover:bg-rose-100 dark:text-rose-400 dark:hover:bg-rose-900/40"
           >
-            <AlertCircle className="w-4 h-4" />
+            <AlertCircle className="h-4 w-4" />
             Still Reviewing
           </button>
 
@@ -85,9 +85,9 @@ export default function FlashcardCard({
               setIsFlipped(false);
               onStatusAction(flashcard._id, true);
             }}
-            className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 font-bold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/30 px-4 py-3 text-xs font-bold text-emerald-600 transition hover:bg-emerald-100 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
           >
-            <CheckCircle2 className="w-4 h-4" />
+            <CheckCircle2 className="h-4 w-4" />
             Got It Right
           </button>
         </div>

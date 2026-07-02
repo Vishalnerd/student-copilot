@@ -13,14 +13,13 @@ import {
 export default function Hero() {
   return (
     /* 💡 FIXED: Stripped old heavy gray parameters to support robust v4 dark canvas themes */
-    <section className="relative overflow-hidden pt-24 pb-16 px-6 md:px-12 bg-slate-50 dark:bg-slate-900 transition-colors duration-200 antialiased">
-      {/* Abstract geometric background line nodes for texture */}
+    <section className="relative overflow-hidden bg-slate-50 dark:bg-slate-900 px-4 sm:px-6 lg:px-12 pt-20 sm:pt-24 lg:pt-28 pb-12 sm:pb-16 transition-colors duration-200 antialiased">
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/10 dark:bg-blue-500/5 blur-3xl rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-400/10 dark:bg-indigo-500/5 blur-3xl rounded-full pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
+      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
         {/* Left Side Content */}
-        <div className="text-center lg:text-left">
+        <div className="text-center lg:text-left order-2 lg:order-1">
           {/* Badge Trigger Announcement */}
           <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100/50 dark:border-blue-900/30 text-blue-600 dark:text-blue-400 mb-6 shadow-3xs">
             <Bolt className="w-3.5 h-3.5 fill-blue-500" />
@@ -30,7 +29,7 @@ export default function Hero() {
           </div>
 
           {/* Headline Title */}
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-slate-100 mb-4 leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black leading-tight tracking-tight text-gray-900 dark:text-slate-100">
             Your AI-Powered <br />
             <span className="text-transparent dark:text-blue-400 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
               Academic Edge
@@ -38,24 +37,24 @@ export default function Hero() {
           </h1>
 
           {/* Description Prose */}
-          <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
+          <p className="mx-auto lg:mx-0 mt-5 mb-8 max-w-xl text-sm sm:text-base leading-relaxed font-medium text-gray-500 dark:text-gray-400">
             Transform your chaotic lecture notes into structured summaries,
             interactive flashcards, and personalized quizzes in seconds. Focus
             on learning, not formatting.
           </p>
 
           {/* Action Call Controls Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+          <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 sm:gap-4">
             <Link
               href="/register"
-              className="w-full sm:w-auto text-center font-bold text-sm px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md hover:shadow-lg transition cursor-pointer active:scale-[0.98]"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-blue-700 hover:shadow-lg active:scale-[0.98]"
             >
               Get Started for Free
             </Link>
 
             <Link
               href="#steps"
-              className="w-full sm:w-auto font-bold text-sm px-6 py-3.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-slate-200 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center justify-center gap-2 cursor-pointer shadow-3xs"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 px-6 py-3.5 text-sm font-bold text-gray-700 dark:text-slate-200 shadow-3xs transition hover:bg-slate-50 dark:hover:bg-slate-700"
             >
               <PlayCircle className="w-5 h-5 text-gray-400 dark:text-gray-500" />
               See how it works
@@ -64,13 +63,13 @@ export default function Hero() {
         </div>
 
         {/* Right Side Hero Visual (UI Mockup Frame) */}
-        <div className="relative lg:h-[600px] flex items-center justify-center">
+        <div className="relative order-1 flex items-center justify-center lg:order-2 lg:h-[600px]">
           {/* Ambient Glow Backdrop Layer */}
           <div className="absolute inset-0 bg-blue-200/20 dark:bg-blue-500/5 rounded-full blur-3xl transform scale-125 pointer-events-none" />
 
           {/* Main Card View Frame Mockup Layout */}
           {/* 💡 FIXED: Rewritten structural frame states to update clean on light/dark modes */}
-          <div className="relative w-full max-w-[460px] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800/80 overflow-hidden p-2 transform lg:rotate-2 hover:rotate-0 transition-all duration-500 select-none">
+          <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-[460px] overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800/80 bg-white dark:bg-slate-800 p-2 shadow-2xl transition-all duration-500 lg:rotate-2 hover:rotate-0">
             {/* Header Window Bar */}
             <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-700/50 bg-slate-50/60 dark:bg-slate-900/40 rounded-t-xl">
               <div className="flex gap-1.5">
@@ -83,7 +82,7 @@ export default function Hero() {
             </div>
 
             {/* Inner App Card Wireframe Nodes */}
-            <div className="p-6 space-y-4">
+            <div className="space-y-4 p-4 sm:p-6">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-100/50 dark:border-blue-900/30 flex-shrink-0">
                   <Bot className="w-4 h-4" />
@@ -95,7 +94,7 @@ export default function Hero() {
               </div>
 
               {/* Feature Box Grid Indicators */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <div className="h-24 bg-blue-50/20 dark:bg-blue-950/10 border border-blue-100/30 dark:border-blue-900/20 rounded-xl p-3 flex flex-col justify-between">
                   <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   <div className="h-2 w-3/4 bg-blue-200/40 dark:bg-blue-900/40 rounded-full" />
@@ -116,7 +115,7 @@ export default function Hero() {
           </div>
 
           {/* Floating Pill Accent Badge Component */}
-          <div className="absolute -top-6 -right-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl px-4 py-2.5 flex items-center gap-2 animate-bounce hidden sm:flex transition-colors">
+          <div className="absolute -top-4 right-0 hidden sm:flex items-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 px-4 py-2.5 shadow-xl transition-colors lg:-right-6">
             <div className="w-5 h-5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100/40 dark:border-emerald-900/40 shadow-sm">
               <Check className="w-3 h-3 stroke-[3]" />
             </div>

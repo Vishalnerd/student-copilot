@@ -12,33 +12,38 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-slate-900 dark:bg-slate-950 text-slate-400 dark:text-slate-500 py-16 px-6 md:px-12 border-t border-slate-800 dark:border-slate-900/50 text-xs transition-colors duration-200 antialiased">
-      <div className="max-w-7xl mx-auto space-y-12">
-        {/* 💡 FIXED: Converted multi-column grid into a clean, distributed 3-zone flex container */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 pb-4">
-          {/* Zone 1: Brand Identity */}
-          <div className="space-y-3 max-w-xs">
-            <div className="flex items-center gap-3 text-white dark:text-slate-100">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-xs">
-                <Sparkles className="w-4 h-4 fill-white" />
+    <footer className="bg-slate-900 dark:bg-slate-950 border-t border-slate-800 dark:border-slate-900/50 py-12 sm:py-16 px-4 sm:px-6 lg:px-12 text-xs text-slate-400 dark:text-slate-500 transition-colors duration-200 antialiased">
+      <div className="mx-auto max-w-7xl space-y-10 sm:space-y-12">
+        {/* Top Section */}
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          {/* Brand */}
+          <div className="max-w-sm space-y-3 text-center lg:text-left">
+            <div className="flex items-center justify-center gap-3 lg:justify-start text-white dark:text-slate-100">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-xs">
+                <Sparkles className="h-4 w-4 fill-white" />
               </div>
+
               <span className="text-base font-bold tracking-tight">
                 Student Copilot
               </span>
             </div>
-            <p className="text-slate-400 dark:text-slate-400 font-medium leading-relaxed">
+
+            <p className="leading-relaxed font-medium text-slate-400">
               Empowering the next generation of scholars with cutting-edge AI.
             </p>
           </div>
 
-          {/* Zone 2: Centered Horizontal Navigation Links */}
-          <nav aria-label="Footer Navigation">
-            <ul className="flex flex-wrap items-center gap-x-8 gap-y-3 font-semibold text-sm">
+          {/* Navigation */}
+          <nav
+            aria-label="Footer Navigation"
+            className="flex justify-center lg:justify-end"
+          >
+            <ul className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-semibold">
               {footerLinks.map((link) => (
                 <li key={link.name}>
                   <Link
-                    className="text-slate-300 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
                     href={link.path}
+                    className="transition-colors text-slate-300 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400"
                   >
                     {link.name}
                   </Link>
@@ -48,15 +53,19 @@ export default function Footer() {
           </nav>
         </div>
 
-        {/* Lower Row Metadata Copyright Layer */}
-        <div className="pt-6 border-t border-slate-800/60 dark:border-slate-900/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-slate-500 dark:text-slate-600 font-medium">
-          <p>© 2026 Student Copilot. All rights reserved.</p>
-          <div className="flex items-center gap-6 text-[11px]">
-            <span className="flex items-center gap-1.5 selection:bg-transparent">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+        {/* Bottom Section */}
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-800/60 dark:border-slate-900/40 pt-6 text-center sm:flex-row sm:text-left">
+          <p className="font-medium text-slate-500 dark:text-slate-600">
+            © 2026 Student Copilot. All rights reserved.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-[11px] font-medium text-slate-500 dark:text-slate-600">
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500 dark:bg-emerald-400" />
               All systems operational
             </span>
-            <button className="hover:text-white dark:hover:text-slate-300 transition-colors cursor-pointer">
+
+            <button className="transition-colors hover:text-white dark:hover:text-slate-300 cursor-pointer">
               English (US)
             </button>
           </div>

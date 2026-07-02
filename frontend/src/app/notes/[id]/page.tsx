@@ -9,6 +9,7 @@ import { Note } from "@/types/note";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import Navbar from "@/app/components/layout/Navbar";
 import Sidebar from "@/app/components/layout/Sidebar";
+import MobileSidebar from "@/app/components/layout/MobileSIdebar"; // Casing matched with your layout folder
 import FlashcardList from "../../components/flashcards/FlashcardList";
 import FlashcardSkeleton from "../../components/flashcards/FlashcardSkeleton";
 
@@ -25,6 +26,7 @@ import {
   MessageSquare,
   Layers,
   Sparkles,
+  Menu, // Imported for the mobile menu trigger action
 } from "lucide-react";
 
 export default function NoteDetailsPage() {
@@ -44,7 +46,7 @@ export default function NoteDetailsPage() {
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [loadingFlashcards, setLoadingFlashcards] = useState(false);
 
-  // 💡 NEW: Centralized processing flag to lock all interactive pathways uniformly
+  // 💡 Centralized processing flag to lock all interactive pathways uniformly
   const isProcessing = askingQuestion || loadingSummary || loadingFlashcards;
 
   useEffect(() => {
@@ -183,16 +185,21 @@ export default function NoteDetailsPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex bg-background text-foreground transition-colors duration-200">
+        <div className="flex min-h-screen bg-background text-foreground transition-colors duration-200">
           <Sidebar />
-          <div className="flex-1 ml-64 bg-slate-50 dark:bg-slate-900 min-h-screen transition-colors duration-200">
+
+          <div className="flex flex-1 flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-200 lg:ml-64">
             <Navbar />
-            <div className="flex flex-col items-center justify-center py-32 space-y-4">
-              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-              <p className="text-xs font-mono font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase">
-                Analyzing Document Blocks...
-              </p>
-            </div>
+
+            <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+              <div className="flex flex-col items-center justify-center space-y-4 text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+
+                <p className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  Analyzing Document Blocks...
+                </p>
+              </div>
+            </main>
           </div>
         </div>
       </ProtectedRoute>
@@ -203,22 +210,27 @@ export default function NoteDetailsPage() {
   if (!note) {
     return (
       <ProtectedRoute>
-        <div className="flex bg-background text-foreground transition-colors duration-200">
+        <div className="flex min-h-screen bg-background text-foreground transition-colors duration-200">
           <Sidebar />
-          <div className="flex-1 ml-64 bg-slate-50 dark:bg-slate-900 min-h-screen transition-colors duration-200">
+
+          <div className="flex flex-1 flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-200 lg:ml-64">
             <Navbar />
-            <main className="p-8 max-w-md mx-auto text-center mt-20">
-              <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-800 rounded-2xl p-8 shadow-2xs">
-                <FileText className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <h3 className="text-base font-bold text-gray-900 dark:text-slate-100">
+
+            <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+              <div className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-6 sm:p-8 text-center shadow-2xs">
+                <FileText className="mx-auto mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" />
+
+                <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100">
                   Document Registry Empty
                 </h3>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+
+                <p className="mt-2 text-sm leading-relaxed text-gray-400 dark:text-gray-500">
                   The note workspace you are trying to visit does not exist.
                 </p>
+
                 <button
                   onClick={() => router.push("/notes")}
-                  className="mt-4 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                  className="mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98]"
                 >
                   Return to Dashboard
                 </button>
@@ -233,91 +245,114 @@ export default function NoteDetailsPage() {
   /* 3. ACTIVE INTERACTIVE STUDY WORKSPACE */
   return (
     <ProtectedRoute>
-      <div className="flex h-screen overflow-hidden bg-background text-foreground transition-colors duration-200">
+      <div className="flex min-h-screen bg-background text-foreground transition-colors duration-200">
         <Sidebar />
 
-        <div className="flex-1 ml-64 flex flex-col bg-white dark:bg-slate-900 overflow-hidden transition-colors duration-200">
-          {/* Workspace Action Header */}
-          <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 px-6 py-3.5 flex items-center justify-between transition-colors duration-200">
-            <div className="flex items-center gap-4">
-              <button
-                disabled={isProcessing} // 💡 Prevent leaving the workspace while async calls are running
-                onClick={() => router.push("/notes")}
-                className="p-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 border border-gray-100 dark:border-gray-800 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100 transition cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <h2 className="text-sm font-bold text-gray-900 dark:text-slate-100 truncate max-w-xs">
-                {note.fileName || "Untitled Document"}
-              </h2>
-            </div>
+        <div className="flex flex-1 flex-col bg-white dark:bg-slate-900 transition-colors duration-200 ml-0 lg:ml-64">
+          {/* Connected Navbar containing the responsive MobileSidebar Primitive Trigger */}
+          <Navbar
+            mobileMenuTrigger={
+              <MobileSidebar
+                trigger={
+                  <button className="lg:hidden p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition focus:outline-none">
+                    <Menu className="h-5 w-5" />
+                  </button>
+                }
+              />
+            }
+          />
 
-            {/* View Mode Tabs Selector Wrapper */}
-            <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex items-center border border-slate-200/40 dark:border-gray-700/60 shadow-inner">
-              <button
-                disabled={isProcessing}
-                onClick={() => setViewMode("chat")}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                  viewMode === "chat"
-                    ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 shadow-2xs border border-gray-200/50 dark:border-gray-600/30"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100"
-                }`}
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-                AI Copilot
-              </button>
-              <button
-                disabled={isProcessing}
-                onClick={() => {
-                  if (flashcards.length === 0 && !loadingFlashcards) {
-                    handleGenerateFlashcards();
-                  } else {
-                    setViewMode("flashcards");
-                  }
-                }}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                  viewMode === "flashcards"
-                    ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-2xs border border-gray-200/50 dark:border-gray-600/30"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100"
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5" />
-                Study Flashcards
-                {flashcards.length > 0 && (
-                  <span className="bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-black px-1.5 py-0.5 text-[9px] rounded-md border border-blue-100 dark:border-blue-900/40">
-                    {flashcards.length}
-                  </span>
-                )}
-              </button>
+          {/* Workspace Header */}
+          <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 px-4 py-4 sm:px-6 transition-colors duration-200">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              {/* Left */}
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  disabled={isProcessing}
+                  onClick={() => router.push("/notes")}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-100 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-slate-100 transition disabled:pointer-events-none disabled:opacity-40"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+
+                <h2 className="truncate text-sm sm:text-base font-bold text-gray-900 dark:text-slate-100">
+                  {note.fileName || "Untitled Document"}
+                </h2>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex w-full overflow-x-auto rounded-xl border border-slate-200/40 dark:border-gray-700/60 bg-slate-100 dark:bg-slate-800 p-1 shadow-inner sm:w-auto">
+                <button
+                  disabled={isProcessing}
+                  onClick={() => setViewMode("chat")}
+                  className={`flex flex-1 sm:flex-none items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 sm:px-4 py-2 text-xs font-bold transition-all disabled:pointer-events-none disabled:opacity-50 ${
+                    viewMode === "chat"
+                      ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 border border-gray-200/50 dark:border-gray-600/30 shadow-2xs"
+                      : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100"
+                  }`}
+                >
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  AI Copilot
+                </button>
+
+                <button
+                  disabled={isProcessing}
+                  onClick={() => {
+                    if (flashcards.length === 0 && !loadingFlashcards) {
+                      handleGenerateFlashcards();
+                    } else {
+                      setViewMode("flashcards");
+                    }
+                  }}
+                  className={`flex flex-1 sm:flex-none items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 sm:px-4 py-2 text-xs font-bold transition-all disabled:pointer-events-none disabled:opacity-50 ${
+                    viewMode === "flashcards"
+                      ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 border border-gray-200/50 dark:border-gray-600/30 shadow-2xs"
+                      : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100"
+                  }`}
+                >
+                  <Layers className="h-3.5 w-3.5" />
+                  Study Flashcards
+                  {flashcards.length > 0 && (
+                    <span className="rounded-md border border-blue-100 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-950/60 px-1.5 py-0.5 text-[9px] font-black text-blue-600 dark:text-blue-400">
+                      {flashcards.length}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Workspace Body Grid */}
-          <div className="flex-1 flex overflow-hidden">
-            <ExtractedTextSidebar content={note.content} />
+          {/* Workspace Layout */}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Desktop Only Side Drawer Content */}
+            <div className="hidden lg:block">
+              <ExtractedTextSidebar content={note.content} />
+            </div>
 
-            <div className="flex-1 flex flex-col bg-slate-50/30 dark:bg-slate-900/20 overflow-hidden transition-colors duration-200">
+            {/* Main Workspace Area Layout Engine */}
+            <div className="flex min-w-0 flex-1 flex-col bg-slate-50/30 dark:bg-slate-900/20 transition-colors duration-200">
               {viewMode === "flashcards" ? (
-                <div className="flex-1 overflow-y-auto p-8 flex flex-col justify-center min-h-0">
+                <div className="flex flex-1 flex-col justify-center overflow-y-auto p-4 sm:p-6 lg:p-8">
                   {loadingFlashcards ? (
                     <FlashcardSkeleton />
                   ) : (
-                    <div className="space-y-4 max-w-xl mx-auto w-full">
-                      <div className="text-center mb-2">
-                        <h3 className="text-base font-bold text-gray-900 dark:text-slate-100 flex items-center justify-center gap-1.5">
-                          <Sparkles className="w-4 h-4 text-amber-500 fill-amber-100 dark:fill-amber-950/20" />
+                    <div className="mx-auto w-full max-w-xl space-y-4">
+                      <div className="mb-2 text-center">
+                        <h3 className="flex items-center justify-center gap-1.5 text-base font-bold text-gray-900 dark:text-slate-100">
+                          <Sparkles className="h-4 w-4 fill-amber-100 text-amber-500 dark:fill-amber-950/20" />
                           Interactive Study Deck
                         </h3>
-                        <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium mt-0.5">
+
+                        <p className="mt-0.5 text-[11px] font-medium text-gray-400 dark:text-gray-500">
                           Test your active recall mastery retention blocks
                         </p>
                       </div>
+
                       <FlashcardList flashcards={flashcards} />
                     </div>
                   )}
                 </div>
               ) : (
-                /* 💡 FIXED: Disabled input/interaction behaviors here during any active processing state */
                 <ChatTerminal
                   disabledInput={isProcessing}
                   chats={chats}
@@ -326,8 +361,6 @@ export default function NoteDetailsPage() {
                 />
               )}
 
-              {/* Bottom Input Dock Panel */}
-              {/* 💡 FIXED: Propagated unified flags down to stop double-triggering across actions */}
               <ActionDockPanel
                 question={question}
                 setQuestion={setQuestion}
@@ -338,7 +371,7 @@ export default function NoteDetailsPage() {
                 loadingSummary={loadingSummary}
                 loadingFlashcards={loadingFlashcards}
                 viewMode={viewMode}
-                disabled={isProcessing} // Make sure your ActionDockPanel component accepts a `disabled` prop to lock down text fields and buttons!
+                disabled={isProcessing}
               />
             </div>
           </div>

@@ -4,9 +4,9 @@ import { useEffect } from "react";
 import { FileText, MessageSquare, ClipboardCheck } from "lucide-react";
 
 export default function Features() {
-  // Retains original Intersection Observer logic for graceful entrance reveal scripts
   useEffect(() => {
     const cards = document.querySelectorAll(".bento-card");
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -57,45 +57,44 @@ export default function Features() {
   ];
 
   return (
-    /* 💡 FIXED: Configured section frame layer using unified v4 design system tokens */
     <section
       id="features"
-      className="py-24 px-4 md:px-8 bg-slate-50 dark:bg-slate-900 border-y border-gray-200/60 dark:border-gray-800/50 transition-colors duration-200 antialiased"
+      className="bg-slate-50 dark:bg-slate-900 border-y border-gray-200/60 dark:border-gray-800/50 py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 transition-colors duration-200 antialiased"
     >
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header Text Stack */}
-        <div className="text-center mb-16 space-y-3">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-slate-100 tracking-tight">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="mb-12 sm:mb-16 space-y-4 text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900 dark:text-slate-100">
             Supercharge Your Study Flow
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-2xl mx-auto leading-relaxed">
+
+          <p className="mx-auto max-w-2xl text-sm sm:text-base leading-relaxed font-medium text-gray-500 dark:text-gray-400">
             We've built a suite of tools designed specifically for the unique
             demands of higher education. No fluff, just results.
           </p>
         </div>
 
-        {/* Bento Grid Layout Area */}
-        <div className="grid md:grid-cols-3 gap-6">
+        {/* Cards */}
+        <div className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
           {featureItems.map((item, i) => {
             const Icon = item.icon;
+
             return (
               <div
                 key={i}
-                /* 💡 FIXED: Configured structural card wrappers to morph cleanly into slate panels */
-                className="bento-card group bg-white dark:bg-slate-800/80 p-6 rounded-2xl border border-gray-200 dark:border-gray-800/80 flex flex-col items-start text-left shadow-2xs hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-md transition-all duration-300"
+                className="bento-card group flex flex-col items-start rounded-2xl border border-gray-200 dark:border-gray-800/80 bg-white dark:bg-slate-800/80 p-5 sm:p-6 text-left shadow-2xs transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-md"
               >
-                {/* Visual Icon Badge Component Wrapper */}
                 <div
-                  className={`w-12 h-12 rounded-xl border border-transparent dark:border-gray-700/40 flex items-center justify-center transition-all duration-300 mb-6 ${item.colorClass}`}
+                  className={`mb-5 flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl border border-transparent dark:border-gray-700/40 transition-all duration-300 ${item.colorClass}`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="h-5 w-5" />
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-2 transition-colors">
+                <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-slate-100">
                   {item.title}
                 </h3>
 
-                <p className="text-xs text-gray-400 dark:text-gray-400 font-medium leading-relaxed transition-colors">
+                <p className="text-sm sm:text-xs leading-relaxed font-medium text-gray-500 dark:text-gray-400">
                   {item.desc}
                 </p>
               </div>

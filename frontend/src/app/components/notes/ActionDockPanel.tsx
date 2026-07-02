@@ -13,32 +13,31 @@ export default function ActionDockPanel({
   loadingSummary,
   loadingFlashcards,
   viewMode,
-  disabled, // 💡 Received from your NoteDetailsPage context state wrapper
+  disabled,
 }: ActionDockPanelProps) {
   return (
-    <div className="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-gray-800/80 p-4 space-y-3 shadow-lg transition-colors duration-200">
-      <div className="flex flex-wrap gap-2 max-w-3xl mx-auto">
-        {/* Dynamic Prompt Chips */}
+    <div className="border-t border-gray-200 dark:border-gray-800/80 bg-white dark:bg-slate-900 p-3 sm:p-4 shadow-lg transition-colors duration-200">
+      {/* Quick Actions */}
+      <div className="mx-auto flex max-w-3xl flex-wrap gap-2">
         {["Explain this concept", "List key terms"].map((chip, i) => (
           <button
             key={i}
-            disabled={disabled} // 💡 FIXED: Locks suggestion text insertion during active async loads
+            disabled={disabled}
             onClick={() => setQuestion(chip)}
-            className="text-xs font-semibold px-3 py-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-gray-700/60 text-gray-600 dark:text-slate-300 rounded-full transition shadow-3xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+            className="rounded-full border border-gray-200 dark:border-gray-700/60 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 shadow-3xs transition hover:bg-slate-100 dark:hover:bg-slate-700 disabled:pointer-events-none disabled:opacity-40"
           >
             {chip}
           </button>
         ))}
 
-        {/* Summary Generation Trigger */}
         <button
           onClick={handleSummary}
-          disabled={disabled || loadingSummary} // 💡 FIXED: Unified lock coverage mapping rules
-          className="text-xs font-semibold px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 dark:disabled:bg-slate-800 disabled:text-gray-400 dark:disabled:text-gray-600 text-white rounded-full transition shadow-3xs cursor-pointer disabled:pointer-events-none"
+          disabled={disabled || loadingSummary}
+          className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-3xs transition hover:bg-blue-700 disabled:pointer-events-none disabled:bg-gray-200 disabled:text-gray-400 dark:disabled:bg-slate-800 dark:disabled:text-gray-600"
         >
           {loadingSummary && viewMode === "chat" ? (
             <span className="flex items-center gap-1">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
               Summarizing...
             </span>
           ) : (
@@ -46,16 +45,15 @@ export default function ActionDockPanel({
           )}
         </button>
 
-        {/* Flashcard Generation Trigger */}
         <button
           onClick={handleGenerateFlashcards}
-          disabled={disabled || loadingFlashcards} // 💡 FIXED: Unified lock coverage mapping rules
-          className="text-xs font-semibold px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-200 dark:disabled:bg-slate-800 disabled:text-gray-400 dark:disabled:text-gray-600 text-white rounded-full transition shadow-3xs cursor-pointer disabled:pointer-events-none"
+          disabled={disabled || loadingFlashcards}
+          className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-3xs transition hover:bg-emerald-700 disabled:pointer-events-none disabled:bg-gray-200 disabled:text-gray-400 dark:disabled:bg-slate-800 dark:disabled:text-gray-600"
         >
           {loadingFlashcards ? (
             <span className="flex items-center gap-1">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Compiling Deck...
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Compiling...
             </span>
           ) : (
             "Generate Flashcards"
@@ -63,30 +61,28 @@ export default function ActionDockPanel({
         </button>
       </div>
 
-      {/* Central Console Message Input Group */}
+      {/* Input */}
       <div
-        className={`relative max-w-3xl mx-auto bg-slate-50 dark:bg-slate-800/60 border border-gray-200 dark:border-gray-700/80 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 rounded-xl transition flex items-center px-3 py-1.5 shadow-inner ${
-          disabled ? "opacity-60 cursor-not-allowed select-none" : ""
+        className={`mx-auto mt-3 flex max-w-3xl items-center rounded-xl border border-gray-200 dark:border-gray-700/80 bg-slate-50 dark:bg-slate-800/60 px-2 sm:px-3 py-1.5 shadow-inner transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 ${
+          disabled ? "cursor-not-allowed select-none opacity-60" : ""
         }`}
       >
-        {/* Clip Attachment Button */}
         <button
           disabled={disabled}
-          className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-slate-300 transition rounded-lg cursor-pointer disabled:pointer-events-none"
+          className="rounded-lg p-2 text-gray-400 transition hover:text-gray-600 dark:text-gray-500 dark:hover:text-slate-300 disabled:pointer-events-none"
         >
-          <Paperclip className="w-4 h-4" />
+          <Paperclip className="h-4 w-4" />
         </button>
 
-        {/* Text Entry Field Box */}
         <input
           type="text"
+          value={question}
+          disabled={disabled}
           placeholder={
             disabled
-              ? "AI is processing your request..."
+              ? "AI is processing..."
               : "Ask anything about these notes..."
           }
-          value={question}
-          disabled={disabled} // 💡 FIXED: Strict field lock prevents entering keyboard values during requests
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey && !disabled) {
@@ -94,25 +90,24 @@ export default function ActionDockPanel({
               handleAsk();
             }
           }}
-          className="w-full bg-transparent border-0 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500 disabled:cursor-not-allowed"
+          className="w-full border-0 bg-transparent px-2 sm:px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none dark:text-slate-100 dark:placeholder-gray-500"
         />
 
-        {/* Message Transmission Send Trigger */}
         <button
           onClick={handleAsk}
-          disabled={disabled || askingQuestion || !question.trim()} // 💡 FIXED: Complete logic block coverage
-          className="p-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 dark:disabled:bg-slate-800 disabled:text-gray-400 dark:disabled:text-gray-600 text-white rounded-xl transition shadow-sm cursor-pointer disabled:pointer-events-none"
+          disabled={disabled || askingQuestion || !question.trim()}
+          className="ml-2 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm transition hover:bg-blue-700 disabled:pointer-events-none disabled:bg-gray-200 disabled:text-gray-400 dark:disabled:bg-slate-800 dark:disabled:text-gray-600"
         >
           {askingQuestion ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Send className="w-4 h-4" />
+            <Send className="h-4 w-4" />
           )}
         </button>
       </div>
 
-      {/* Footer Disclaimer Tag */}
-      <p className="text-[10px] text-center font-mono font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase pt-1">
+      {/* Footer */}
+      <p className="pt-2 text-center text-[10px] font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
         Student Copilot AI can make mistakes. Verify critical information.
       </p>
     </div>

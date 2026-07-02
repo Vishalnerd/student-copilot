@@ -48,45 +48,52 @@ export default function FlashcardList({ flashcards }: FlashcardListProps) {
   if (completed) {
     return (
       /* 💡 FIXED: Adjusted outer status wrapper card for unified v4 dark-mode transitions */
-      <div className="max-w-md mx-auto text-center bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-800 rounded-2xl p-8 shadow-2xs space-y-6 animate-in fade-in duration-300 transition-colors">
-        <div className="w-14 h-14 bg-amber-50 dark:bg-amber-950/30 text-amber-500 dark:text-amber-400 rounded-2xl flex items-center justify-center border border-amber-100/40 dark:border-amber-900/30 mx-auto shadow-xs">
-          <Award className="w-7 h-7 fill-amber-50/20 dark:fill-transparent" />
+      <div className="mx-auto w-full max-w-md space-y-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-5 sm:p-8 text-center shadow-2xs animate-in fade-in duration-300 transition-colors">
+        {/* Trophy */}
+        <div className="mx-auto flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl border border-amber-100/40 dark:border-amber-900/30 bg-amber-50 dark:bg-amber-950/30 text-amber-500 dark:text-amber-400 shadow-xs">
+          <Award className="h-6 w-6 sm:h-7 sm:w-7 fill-amber-50/20 dark:fill-transparent" />
         </div>
 
+        {/* Title */}
         <div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-slate-100">
             Session Complete!
           </h3>
-          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-1">
+
+          <p className="mt-1 text-xs font-medium leading-relaxed text-gray-400 dark:text-gray-500">
             You successfully reviewed all {flashcards.length} items.
           </p>
         </div>
 
-        {/* 💡 FIXED: Inverted scoreboard panel inner colors */}
-        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-4 border border-gray-100 dark:border-gray-800/60 grid grid-cols-2 gap-4 transition-colors">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl border border-gray-100 dark:border-gray-800/60 bg-slate-50 dark:bg-slate-900/60 p-4 transition-colors">
           <div>
-            <span className="text-[10px] font-mono font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
               Mastery Accuracy
             </span>
-            <p className="text-2xl font-black text-gray-900 dark:text-slate-100 mt-0.5">
+
+            <p className="mt-1 text-2xl font-black text-gray-900 dark:text-slate-100">
               {Math.round((masteredCount / flashcards.length) * 100)}%
             </p>
           </div>
+
           <div>
-            <span className="text-[10px] font-mono font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
               Cards Got Right
             </span>
-            <p className="text-2xl font-black text-gray-900 dark:text-slate-100 mt-0.5">
+
+            <p className="mt-1 text-2xl font-black text-gray-900 dark:text-slate-100 break-words">
               {masteredCount}/{flashcards.length}
             </p>
           </div>
         </div>
 
+        {/* Button */}
         <button
           onClick={handleReset}
-          className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl transition shadow-xs cursor-pointer active:scale-[0.98]"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm sm:text-xs font-bold text-white shadow-xs transition hover:bg-blue-700 active:scale-[0.98] cursor-pointer"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="h-4 w-4" />
           Study Deck Again
         </button>
       </div>

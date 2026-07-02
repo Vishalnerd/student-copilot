@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import Sidebar from "@/app/components/layout/Sidebar";
 import Navbar from "@/app/components/layout/Navbar";
+import MobileSidebar from "@/app/components/layout/MobileSIdebar"; // Casing matched with your layout folder typo
 import QuizCard from "../components/quiz/QuizCard";
 import QuizSummary from "../components/quiz/QuizSummary";
 import { getMyNotes } from "@/services/noteApi";
@@ -19,6 +20,7 @@ import {
   Loader2,
   Sparkles,
   Award,
+  Menu, // Imported for the mobile menu trigger action
 } from "lucide-react";
 
 export default function GlobalQuizPage() {
@@ -87,24 +89,35 @@ export default function GlobalQuizPage() {
 
   return (
     <ProtectedRoute>
-      {/* 💡 Upgraded background shell using v4 semantic design tokens */}
-      <div className="flex h-screen overflow-hidden bg-background text-foreground transition-colors duration-200">
-        {/* Main Application Sidebar */}
+      <div className="flex min-h-screen bg-background text-foreground transition-colors duration-200">
         <Sidebar />
 
-        {/* 💡 Fluid canvas layout handling theme mode conversions across views */}
-        <div className="flex-1 ml-64 flex flex-col bg-white dark:bg-slate-900 overflow-hidden transition-colors duration-200">
-          <Navbar />
+        {/* Main Content Layout Container */}
+        {/* 💡 Adjusted structural padding class variables using fluid margins (ml-0 lg:ml-64) */}
+        <div className="flex flex-1 flex-col bg-white dark:bg-slate-900 transition-colors duration-200 ml-0 lg:ml-64">
+          {/* Connected Navbar containing the responsive MobileSidebar Primitives Trigger */}
+          <Navbar
+            mobileMenuTrigger={
+              <MobileSidebar
+                trigger={
+                  <button className="lg:hidden p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition focus:outline-none">
+                    <Menu className="h-5 w-5" />
+                  </button>
+                }
+              />
+            }
+          />
 
-          <main className="flex-1 overflow-y-auto p-8 max-w-5xl mx-auto w-full space-y-6">
-            {/* Top Identity Meta Header Header Context Area */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-5">
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-6">
+            {/* Header */}
+            <div className="flex flex-col gap-4 border-b border-gray-100 dark:border-gray-800 pb-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
-                <h1 className="text-2xl font-black text-gray-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-                  <CheckSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight text-gray-900 dark:text-slate-100">
+                  <CheckSquare className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   Exam Mode Dashboard
                 </h1>
-                <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
+
+                <p className="text-xs font-medium text-gray-400 dark:text-gray-500">
                   Select a document workspace resource below to generate and
                   take simulated knowledge gap tests.
                 </p>
@@ -113,58 +126,56 @@ export default function GlobalQuizPage() {
               {activeNote && (
                 <button
                   onClick={handleExitQuiz}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-gray-700/60 text-gray-700 dark:text-slate-200 rounded-xl transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 self-start rounded-xl border border-gray-200 dark:border-gray-700/60 bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 transition hover:bg-slate-200 dark:hover:bg-slate-700 sm:self-auto"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="h-4 w-4" />
                   Exit Quiz Mode
                 </button>
               )}
             </div>
 
-            {/* CONDITIONAL RENDER AREA */}
+            {/* Loading */}
             {loadingNotes ? (
-              /* Global Sync Loading Indicator Viewport */
               <div className="flex flex-col items-center justify-center py-32 space-y-3">
-                <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-                <p className="text-xs font-mono font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                <p className="text-xs font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                   Synchronizing Workspace Decks...
                 </p>
               </div>
             ) : !activeNote ? (
-              /* NOTE REGISTRY DASHBOARD DISPLAY GRID SELECTION */
               <div className="space-y-4">
-                <h2 className="text-xs font-mono font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase">
+                <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                   Available Notebook Question Sheets ({notes.length})
                 </h2>
 
                 {notes.length === 0 ? (
-                  /* Dry Empty State Card Inversion */
-                  <div className="bg-white dark:bg-slate-800 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl p-12 text-center max-w-md mx-auto space-y-4 shadow-2xs">
-                    <div className="w-12 h-12 bg-slate-50 dark:bg-slate-900 border border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 rounded-xl flex items-center justify-center mx-auto">
-                      <HelpCircle className="w-5 h-5" />
+                  <div className="mx-auto max-w-md space-y-4 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-12 text-center shadow-2xs">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-gray-100 dark:border-gray-800 bg-slate-50 dark:bg-slate-900 text-gray-400 dark:text-gray-500">
+                      <HelpCircle className="h-5 w-5" />
                     </div>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium max-w-[280px] mx-auto leading-relaxed">
-                      You must upload notes into your centralized directory file
-                      registry dashboard before taking quiz exams.
+
+                    <p className="mx-auto max-w-[280px] text-xs font-medium leading-relaxed text-gray-400 dark:text-gray-500">
+                      You must upload notes before taking quiz exams.
                     </p>
                   </div>
                 ) : (
-                  /* Decks Selection Component Mapping Grid Grid */
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {notes.map((noteItem) => (
                       <div
                         key={noteItem._id}
-                        className="bg-white dark:bg-slate-800/80 border border-gray-200/80 dark:border-gray-800 rounded-2xl p-5 shadow-3xs hover:shadow-xs group transition-all duration-200 flex items-center justify-between hover:border-blue-500 dark:hover:border-blue-500"
+                        className="group flex flex-col gap-4 rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-slate-800/80 p-5 shadow-3xs transition-all duration-200 hover:border-blue-500 hover:shadow-xs sm:flex-row sm:items-center sm:justify-between"
                       >
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className="w-10 h-10 bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-100/50 dark:border-blue-900/30 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white transition-colors">
-                            <BookOpen className="w-4 h-4" />
+                        <div className="flex min-w-0 items-center gap-4">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-blue-100/50 dark:border-blue-900/30 bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+                            <BookOpen className="h-4 w-4" />
                           </div>
-                          <div className="space-y-0.5 min-w-0">
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-slate-100 truncate pr-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+
+                          <div className="min-w-0">
+                            <h3 className="truncate pr-2 text-sm font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400">
                               {noteItem.fileName.replace(/\.[^/.]+$/, "")}
                             </h3>
-                            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
+
+                            <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500">
                               Modified{" "}
                               {new Date(
                                 noteItem.createdAt,
@@ -175,10 +186,10 @@ export default function GlobalQuizPage() {
 
                         <button
                           onClick={() => handleStartQuiz(noteItem._id)}
-                          className="inline-flex items-center gap-1 px-3.5 py-2 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100/80 dark:hover:bg-blue-900/60 rounded-xl transition shadow-3xs flex-shrink-0 group-hover:bg-blue-600 dark:group-hover:bg-blue-600 group-hover:text-white dark:group-hover:text-white cursor-pointer"
+                          className="inline-flex items-center justify-center gap-1 rounded-xl bg-blue-50 dark:bg-blue-950/40 px-4 py-2 text-xs font-bold text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white dark:text-blue-400 dark:group-hover:bg-blue-600"
                         >
                           Take Quiz
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <ArrowRight className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ))}
@@ -186,18 +197,15 @@ export default function GlobalQuizPage() {
                 )}
               </div>
             ) : (
-              /* ACTIVE STEPPER SCREEN VIEW LAYER */
-              <div className="w-full max-w-xl mx-auto py-4">
+              <div className="mx-auto w-full max-w-xl py-4">
                 {loadingQuiz ? (
-                  /* Quiz Loading Frame State */
                   <div className="flex flex-col items-center justify-center py-24 space-y-3">
-                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-                    <p className="text-xs font-mono font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                    <p className="text-xs font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                       Assembling Dynamic Evaluation Matrix...
                     </p>
                   </div>
                 ) : quizSubmitted ? (
-                  /* Ensure the sub-component internally leverages standard layout styles */
                   <QuizSummary
                     quizzes={quizzes}
                     userAnswers={userAnswers}
@@ -206,28 +214,26 @@ export default function GlobalQuizPage() {
                     loadingRegen={loadingQuiz}
                   />
                 ) : quizzes.length > 0 ? (
-                  <div className="space-y-6 w-full">
-                    {/* Stepper Progress Bar Tracking Component */}
+                  <div className="space-y-6">
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs font-bold text-gray-400 dark:text-gray-500">
                         <span className="font-mono text-[10px]">
                           QUESTION {currentQuizIndex + 1} OF {quizzes.length}
                         </span>
+
                         <span className="text-[10px]">
                           {progressPercentage}% COMPLETION
                         </span>
                       </div>
-                      {/* Progress Rails */}
-                      <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                         <div
-                          className="bg-blue-600 h-full transition-all duration-300 rounded-full"
+                          className="h-full rounded-full bg-blue-600 transition-all"
                           style={{ width: `${progressPercentage}%` }}
                         />
                       </div>
                     </div>
 
-                    {/* Active Question Render Card */}
-                    {/* Check your QuizCard component layout internally to support dark variables */}
                     <QuizCard
                       quiz={quizzes[currentQuizIndex]}
                       selectedOption={
@@ -236,12 +242,11 @@ export default function GlobalQuizPage() {
                       onSelectOption={handleSelectOption}
                     />
 
-                    {/* Lower Navigation Deck Buttons Footer */}
-                    <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center justify-between">
                       <button
                         disabled={currentQuizIndex === 0}
                         onClick={() => setCurrentQuizIndex((prev) => prev - 1)}
-                        className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-slate-100 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+                        className="text-xs font-bold text-gray-500 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-slate-100 disabled:pointer-events-none disabled:opacity-30"
                       >
                         Previous
                       </button>
@@ -251,10 +256,10 @@ export default function GlobalQuizPage() {
                           onClick={() =>
                             setCurrentQuizIndex((prev) => prev + 1)
                           }
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition cursor-pointer"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 transition hover:text-blue-700 dark:text-blue-400"
                         >
                           Next Question
-                          <ArrowRight className="w-4 h-4" />
+                          <ArrowRight className="h-4 w-4" />
                         </button>
                       ) : (
                         <button
@@ -262,7 +267,7 @@ export default function GlobalQuizPage() {
                             setQuizSubmitted(true);
                             toast.success("Exam Grading Completed!");
                           }}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl transition shadow-xs cursor-pointer active:scale-[0.98]"
+                          className="rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-blue-700"
                         >
                           Finish & Submit
                         </button>
@@ -270,11 +275,11 @@ export default function GlobalQuizPage() {
                     </div>
                   </div>
                 ) : (
-                  /* Fallback Blueprint Frame Node */
-                  <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 max-w-sm mx-auto space-y-3 shadow-2xs transition-colors">
-                    <Sparkles className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto animate-pulse" />
-                    <p className="text-gray-400 dark:text-gray-500 text-xs font-medium">
-                      No quiz sheets generated for this workbook context path.
+                  <div className="mx-auto max-w-sm space-y-3 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-8 text-center shadow-2xs">
+                    <Sparkles className="mx-auto h-8 w-8 animate-pulse text-gray-300 dark:text-gray-600" />
+
+                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                      No quiz sheets generated for this workbook.
                     </p>
                   </div>
                 )}

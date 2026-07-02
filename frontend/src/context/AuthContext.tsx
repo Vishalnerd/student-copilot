@@ -37,31 +37,21 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   /**
-   * 🧠 Source of Truth: Core verification strategy on page mounts.
-   * Leverages the existing httpOnly session cookie to hydrate client state.
+   * Backend is the source of truth.
+   * Reads the authenticated user from the HTTP-only cookies.
    */
   const checkAuthStatus = async () => {
-    if (typeof window !== "undefined") {
-      const path = window.location.pathname;
-      // 💡 GUARD 2: Do not hit the profile endpoint if the user is on a public auth page
-      if (path === "/login" || path === "/register" || path === "/") {
-        setLoading(false);
-        return;
-      }
-    }
     try {
       setLoading(true);
+
       const response = await api.get("/auth/profile");
-      if (response.data) {
-        login(response.data);
-      } else {
-        setUser(null);
-      }
-    } catch (err) {
-      // Catch silently on application boots: user is simply unauthenticated
+
+      setUser(response.data);
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
@@ -73,52 +63,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
-   * 🚀 Production Login Hydration Hook
-   * Sets user profiles instantly into React state upon successful controller validation responses.
+   * Manual hydration helper.
+   * Mainly useful after profile updates.
    */
   const login = (userData: UserProfile) => {
     setUser(userData);
-    setLoading(false); // Safeguard: visually seals authentication checks as completed
   };
 
+  /**
+   * Email / Password Login
+   */
   const loginWithPassword = async (email: string, password: string) => {
-    const response = await loginUser(email.toLowerCase().trim(), password);
+    await loginUser(email.toLowerCase().trim(), password);
 
-    login(response.user);
+    // Small delay gives mobile browsers time
+    // to persist secure cookies.
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    await checkAuthStatus();
   };
 
+  /**
+   * Register
+   */
   const registerWithPassword = async (
     name: string,
     email: string,
     password: string,
   ) => {
-    const response = await registerUser(
-      name.trim(),
-      email.toLowerCase().trim(),
-      password,
-    );
-    login(response.user);
-  };
+    await registerUser(name.trim(), email.toLowerCase().trim(), password);
 
-  const loginWithGoogle = async (credential: string) => {
-    const response = await googleLogin(credential);
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
-    login(response.user);
+    await checkAuthStatus();
   };
 
   /**
-   * 🛑 Production Logout Cleanup Hook
-   * Triggers the backend cookie flushing sequence and safely empties context memory spaces.
+   * Google Login
+   */
+  const loginWithGoogle = async (credential: string) => {
+    await googleLogin(credential);
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    await checkAuthStatus();
+  };
+
+  /**
+   * Logout
    */
   const logout = async () => {
     try {
       setLoading(true);
+
       await api.post("/auth/logout");
-    } catch (error) {
-      console.error("Context tier caught log out failure exception:", error);
+    } catch (err) {
+      console.error(err);
     } finally {
       setUser(null);
       setLoading(false);
+
       if (typeof window !== "undefined") {
         window.location.replace("/login");
       }
@@ -133,11 +137,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         login,
 
-        registerWithPassword,
         loginWithPassword,
+        registerWithPassword,
         loginWithGoogle,
 
         logout,
+
         checkAuthStatus,
       }}
     >

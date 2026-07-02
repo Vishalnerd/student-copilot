@@ -2,7 +2,7 @@
 
 import Markdown from "react-markdown";
 import { CheckCircle2, Circle } from "lucide-react";
-import { QuizItem, QuizCardProps } from "@/types/quiz";
+import { QuizCardProps } from "@/types/quiz";
 
 export default function QuizCard({
   quiz,
@@ -11,19 +11,18 @@ export default function QuizCard({
   showReview = false,
 }: QuizCardProps) {
   return (
-    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-2xs transition-all duration-300">
-      {/* Question Header Layout */}
-      <div className="text-gray-900 dark:text-slate-100 font-bold text-base md:text-lg leading-relaxed mb-6 prose prose-sm dark:prose-invert max-w-none">
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-4 sm:p-5 lg:p-6 shadow-2xs transition-all duration-300">
+      {/* Question */}
+      <div className="prose prose-sm dark:prose-invert mb-5 sm:mb-6 max-w-none text-gray-900 dark:text-slate-100 font-bold leading-relaxed text-sm sm:text-base lg:text-lg">
         <Markdown>{quiz.question}</Markdown>
       </div>
 
-      {/* Multiple Choice Options Deck List */}
+      {/* Options */}
       <div className="space-y-3">
         {quiz.options.map((option, index) => {
           const isSelected = selectedOption === option;
           const isCorrect = option === quiz.correctAnswer;
 
-          // 💡 FIXED: Completely rewritten semantic variable layers to sync seamlessly under dark execution runs
           let optionStyles =
             "bg-slate-50 dark:bg-slate-900/40 border-gray-200 dark:border-gray-700/60 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-gray-700 dark:text-slate-300";
 
@@ -48,19 +47,25 @@ export default function QuizCard({
               key={index}
               disabled={showReview}
               onClick={() => onSelectOption(option)}
-              className={`w-full text-left p-4 rounded-xl border text-sm transition-all flex items-center justify-between cursor-pointer group ${optionStyles}`}
+              className={`group flex w-full items-start justify-between gap-3 rounded-xl border p-3 sm:p-4 text-left text-sm transition-all cursor-pointer ${optionStyles}`}
             >
-              <span className="pr-4">{option}</span>
+              <span className="flex-1 break-words leading-relaxed">
+                {option}
+              </span>
 
-              <div className="shrink-0">
+              <div className="mt-0.5 shrink-0">
                 {showReview && isCorrect ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                 ) : isSelected ? (
                   <CheckCircle2
-                    className={`w-4 h-4 ${showReview ? "text-rose-500" : "text-blue-600 dark:text-blue-400"}`}
+                    className={`h-5 w-5 ${
+                      showReview
+                        ? "text-rose-500"
+                        : "text-blue-600 dark:text-blue-400"
+                    }`}
                   />
                 ) : (
-                  <Circle className="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400 dark:group-hover:text-gray-500 transition-colors" />
+                  <Circle className="h-5 w-5 text-gray-300 transition-colors group-hover:text-gray-400 dark:text-gray-600 dark:group-hover:text-gray-500" />
                 )}
               </div>
             </button>

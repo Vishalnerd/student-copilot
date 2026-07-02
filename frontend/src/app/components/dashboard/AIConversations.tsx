@@ -44,37 +44,38 @@ export default function AIConversations() {
   // 1. ISOLATED INITIALIZER LOADING RUNTIME BOUNDARY
   if (loading) {
     return (
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 flex flex-col min-h-[320px] justify-center items-center transition-colors duration-200">
-        <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-        <p className="text-[11px] font-mono font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mt-2">
+      <div className="flex min-h-[280px] sm:min-h-[320px] flex-col items-center justify-center rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-4 sm:p-6 transition-colors duration-200">
+        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        <p className="mt-2 text-center text-[11px] font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           Syncing chat logs...
         </p>
       </div>
     );
   }
 
-  // 2. EMPTY REGISTRY DRY FALLBACK VIEWPORT
+  // EMPTY STATE
   if (conversations.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 flex flex-col min-h-[320px] justify-between text-left transition-colors duration-200">
-        <div className="flex justify-between items-center">
-          <h3 className="text-xs font-mono font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+      <div className="flex min-h-[280px] sm:min-h-[320px] flex-col justify-between rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-4 sm:p-6 text-left transition-colors duration-200">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
             AI Conversations
           </h3>
         </div>
 
-        <div className="text-center py-6 space-y-3">
-          <div className="w-10 h-10 bg-slate-50 dark:bg-slate-900 border border-gray-100 dark:border-gray-700/60 text-gray-300 dark:text-gray-500 rounded-xl flex items-center justify-center mx-auto">
-            <MessageSquare className="w-5 h-5" />
+        <div className="space-y-3 py-6 text-center">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-gray-100 dark:border-gray-700/60 bg-slate-50 dark:bg-slate-900 text-gray-300 dark:text-gray-500">
+            <MessageSquare className="h-5 w-5" />
           </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium max-w-[200px] mx-auto leading-normal">
+
+          <p className="mx-auto max-w-[220px] text-xs font-medium leading-normal text-gray-400 dark:text-gray-500">
             No recent AI activity sessions cataloged yet.
           </p>
         </div>
 
         <Link
           href="/notes"
-          className="w-full py-2.5 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-50 dark:hover:bg-slate-900 text-gray-500 dark:text-gray-400 font-bold text-xs text-center transition tracking-wide uppercase cursor-pointer"
+          className="w-full rounded-xl border border-dashed border-gray-200 dark:border-gray-700 bg-slate-50/50 dark:bg-slate-900/40 px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wide text-gray-500 transition hover:bg-slate-50 dark:text-gray-400 dark:hover:bg-slate-900"
         >
           Open Notes to Start Chatting
         </Link>
@@ -82,37 +83,38 @@ export default function AIConversations() {
     );
   }
 
-  // 3. COMPILED FEED TIMELINE SCREEN DISPLAY
+  // MAIN VIEW
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 flex flex-col shadow-2xs min-h-[320px] justify-between transition-colors duration-200">
+    <div className="flex min-h-[280px] sm:min-h-[320px] flex-col justify-between rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800 p-4 sm:p-6 shadow-2xs transition-colors duration-200">
       <div>
-        <div className="flex justify-between items-center mb-5">
-          <h3 className="text-xs font-mono font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
             AI Conversations
           </h3>
+
           <Link
             href="/chat"
-            className="text-blue-600 dark:text-blue-400 text-xs font-bold hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-0.5 group"
+            className="flex flex-shrink-0 items-center gap-1 text-xs font-bold text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 group"
           >
             Open Live
-            <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
 
-        {/* Dynamic Mapping Layout Frame Container */}
         <div className="space-y-3">
           {conversations.map((conv: any) => (
             <Link
               key={conv.id || conv._id}
               href={`/notes/${conv.noteId}`}
-              className="block border border-gray-100 dark:border-gray-700/50 bg-slate-50/30 dark:bg-slate-900/30 rounded-xl p-3.5 hover:border-blue-200 dark:hover:border-blue-500/40 hover:bg-blue-50/20 dark:hover:bg-blue-950/20 transition group text-left"
+              className="block rounded-xl border border-gray-100 dark:border-gray-700/50 bg-slate-50/30 dark:bg-slate-900/30 p-3 sm:p-3.5 text-left transition hover:border-blue-200 hover:bg-blue-50/20 dark:hover:border-blue-500/40 dark:hover:bg-blue-950/20 group"
             >
               <div className="flex items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 dark:text-slate-100 text-sm truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400">
                     {conv.title}
                   </p>
-                  <p className="text-xs font-medium text-gray-400 dark:text-gray-500 truncate mt-0.5 leading-normal">
+
+                  <p className="mt-1 truncate text-xs font-medium leading-normal text-gray-400 dark:text-gray-500">
                     {conv.preview || "No message overview provided..."}
                   </p>
                 </div>
@@ -124,7 +126,7 @@ export default function AIConversations() {
 
       <Link
         href="/notes"
-        className="w-full mt-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-900/60 transition flex items-center justify-center gap-2 text-xs font-bold shadow-3xs cursor-pointer"
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2.5 text-xs font-bold text-gray-600 shadow-3xs transition hover:bg-slate-50 dark:text-gray-400 dark:hover:bg-slate-900/60"
       >
         View All History Logs
       </Link>
