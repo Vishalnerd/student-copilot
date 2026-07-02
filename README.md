@@ -372,9 +372,3 @@ If you found this project useful, consider giving it a ⭐ on GitHub.
 
 - LinkedIn: https://linkedin.com/in/vishal-tanwar-a7076a286/
 - GitHub: https://github.com/Vishalnerd
-
----
-
-# ⭐ Support
-
-If you found this project useful, consider giving it a ⭐ on GitHub.
