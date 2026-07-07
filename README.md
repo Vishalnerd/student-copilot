@@ -344,7 +344,6 @@ GitHub Actions automatically
 
 # 🚀 Future Improvements
 
-- Google OAuth
 - Redis Caching
 - Swagger API Documentation
 - Email Verification
