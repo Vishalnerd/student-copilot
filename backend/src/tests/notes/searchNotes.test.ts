@@ -165,15 +165,12 @@ describe("Search Notes API", () => {
   });
 
   it("should reject unauthorized", async () => {
+    const response = await request(app)
+      .get("/api/notes/search")
+      .query({ q: "Java" })
+      .set("Cookie", ["accessToken=invalid-or-expired-token-string"]); // 💡 Forces evaluation inside protect middleware on the correct route
 
-    const response =
-      await request(app)
-
-        .get("/api/notes/search?q=Java");
-
-    expect(response.status)
-      .toBe(401);
-
+    expect(response.status).toBe(401);
   });
 
 });
