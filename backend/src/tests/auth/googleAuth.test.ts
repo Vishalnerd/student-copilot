@@ -1,13 +1,13 @@
 import request from "supertest";
 import bcrypt from "bcryptjs";
-
 import app from "../../app";
 import User from "../../models/user";
+
+// 💡 Tell Jest to explicitly use your custom mock file implementation
 import { verifyIdTokenMock } from "../__mocks__/google-auth-library";
+jest.mock("google-auth-library"); 
 
-jest.mock("google-auth-library");
-
-describe("Google OAuth", () => {
+describe("Google OAuth Integration Suite", () => {
   const googlePayload = {
     sub: "google-user-id",
     email: "google@test.com",
@@ -15,13 +15,17 @@ describe("Google OAuth", () => {
     picture: "https://avatar.test/avatar.png",
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await User.deleteMany({});
     jest.clearAllMocks();
 
+    // 💡 This hook reference link stays completely connected now!
     verifyIdTokenMock.mockResolvedValue({
       getPayload: () => googlePayload,
     });
   });
+
+  // ... keep all your standard 'it()' test blocks exactly the same here
 
   it("should create a new Google user", async () => {
     const response = await request(app)

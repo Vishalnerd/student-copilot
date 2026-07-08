@@ -2,397 +2,95 @@ import request from "supertest";
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
-
 import app from "../../app";
-
 import User from "../../models/user";
 import Note from "../../models/note";
-import NoteChunk from "../../models/NoteChunk";
+import { pdfQueue } from "../../jobs/pdfQueue";
 
-import extractPdfText from "../../utils/extractPdfText";
-import { generateEmbedding } from "../../services/ai/embeddingService";
+// 💡 Mock the BullMQ processing queue infrastructure safely
+jest.mock("../../jobs/pdfQueue", () => ({
+  pdfQueue: {
+    add: jest.fn().mockResolvedValue({ id: "mock-job-id" }),
+  },
+}));
 
-jest.mock("../../utils/extractPdfText");
+describe("Upload Note API (BullMQ Orchestrator)", () => {
+  let cookies: string;
+  const pdfPath = path.join(__dirname, "sample.pdf");
 
-jest.mock("../../services/ai/embeddingService");
+  beforeAll(() => {
+    fs.writeFileSync(pdfPath, "Fake PDF");
+  });
 
-const mockedExtract =
-extractPdfText as jest.Mock;
+  afterAll(() => {
+    if (fs.existsSync(pdfPath)) {
+      fs.unlinkSync(pdfPath);
+    }
+  });
 
-const mockedEmbedding =
-generateEmbedding as jest.Mock;
+  beforeEach(async () => {
+    await User.deleteMany({});
+    await Note.deleteMany({});
+    jest.clearAllMocks();
 
-describe("Upload Note API", () => {
+    const password = await bcrypt.hash("Password123", 10);
+    await User.create({
+      name: "Vishal",
+      email: "upload@test.com",
+      password,
+    });
 
-let cookies:string;
+    const login = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: "upload@test.com",
+        password: "Password123",
+      });
 
-beforeEach(async()=>{
+    cookies = login.headers["set-cookie"];
+  });
 
-mockedExtract.mockResolvedValue(
+  it("should upload note and return 202 accepted status", async () => {
+    const response = await request(app)
+      .post("/api/notes/upload")
+      .set("Cookie", cookies)
+      .attach("file", pdfPath);
 
-"This is Java. Java is OOP."
+    expect(response.status).toBe(202);
+  });
 
-);
+  it("should save note metadata shell with pending tracking states", async () => {
+    await request(app)
+      .post("/api/notes/upload")
+      .set("Cookie", cookies)
+      .attach("file", pdfPath);
 
-mockedEmbedding.mockResolvedValue(
+    const notes = await Note.find({});
+    expect(notes.length).toBe(1);
+    expect(notes[0].fileName).toBe("sample.pdf");
+    expect(notes[0].status).toBe("processing"); // 💡 Content is unparsed until worker fires
+  });
 
-[1,2,3]
+  it("should queue pdf processing task inside BullMQ", async () => {
+    await request(app)
+      .post("/api/notes/upload")
+      .set("Cookie", cookies)
+      .attach("file", pdfPath);
 
-);
+    expect(pdfQueue.add).toHaveBeenCalledWith(
+      "process-pdf",
+      expect.objectContaining({
+        noteId: expect.any(String),
+      })
+    );
+  });
 
-const password=
-await bcrypt.hash(
+  it("should reject missing file with 400 Bad Request", async () => {
+    const response = await request(app)
+      .post("/api/notes/upload")
+      .set("Cookie", cookies);
 
-"Password123",
-
-10
-
-);
-
-await User.create({
-
-name:"Vishal",
-
-email:"upload@test.com",
-
-password,
-
+    expect(response.status).toBe(400);
+    expect(pdfQueue.add).not.toHaveBeenCalled();
+  });
 });
-
-const login=
-await request(app)
-
-.post("/api/auth/login")
-
-.send({
-
-email:"upload@test.com",
-
-password:"Password123",
-
-});
-
-cookies=
-login.headers["set-cookie"];
-
-});
-
-afterEach(()=>{
-
-jest.clearAllMocks();
-
-})
-
-const pdfPath =
-path.join(
-
-__dirname,
-
-"sample.pdf"
-
-);
-
-beforeAll(()=>{
-
-fs.writeFileSync(
-
-pdfPath,
-
-"Fake PDF"
-
-);
-
-});
-
-afterAll(()=>{
-
-if(
-
-fs.existsSync(pdfPath)
-
-){
-
-fs.unlinkSync(pdfPath);
-
-}
-
-});
-
-it("should upload note",async()=>{
-
-const response=
-
-await request(app)
-
-.post("/api/notes/upload")
-
-.set(
-
-"Cookie",
-
-cookies
-
-)
-
-.attach(
-
-"file",
-
-pdfPath
-
-);
-
-expect(
-
-response.status
-
-).toBe(201);
-
-});
-
-it("should save note",async()=>{
-
-await request(app)
-
-.post("/api/notes/upload")
-
-.set(
-
-"Cookie",
-
-cookies
-
-)
-
-.attach(
-
-"file",
-
-pdfPath
-
-);
-
-const notes=
-
-await Note.find({});
-
-expect(
-
-notes.length
-
-).toBe(1);
-
-expect(
-
-notes[0].content
-
-)
-
-.toContain(
-
-"Java"
-
-);
-
-});
-
-it("should create chunks",async()=>{
-
-await request(app)
-
-.post("/api/notes/upload")
-
-.set(
-
-"Cookie",
-
-cookies
-
-)
-
-.attach(
-
-"file",
-
-pdfPath
-
-);
-
-const chunks=
-
-await NoteChunk.find({});
-
-expect(
-
-chunks.length
-
-)
-
-.toBeGreaterThan(0);
-
-});
-
-it("should generate embeddings",async()=>{
-
-await request(app)
-
-.post("/api/notes/upload")
-
-.set(
-
-"Cookie",
-
-cookies
-
-)
-
-.attach(
-
-"file",
-
-pdfPath
-
-);
-
-expect(
-
-mockedEmbedding
-
-)
-
-.toHaveBeenCalled();
-
-});
-
-
-it("should reject missing file",async()=>{
-
-const response=
-
-await request(app)
-
-.post("/api/notes/upload")
-
-.set(
-
-"Cookie",
-
-cookies
-
-);
-
-expect(
-
-response.status
-
-).toBe(400);
-
-});
-
-it("should handle extraction failure",async()=>{
-
-mockedExtract.mockRejectedValue(
-
-new Error("PDF Error")
-
-);
-
-const spy=
-
-jest.spyOn(
-
-console,
-
-"error"
-
-)
-
-.mockImplementation(()=>{});
-
-const response=
-
-await request(app)
-
-.post("/api/notes/upload")
-
-.set(
-
-"Cookie",
-
-cookies
-
-)
-
-.attach(
-
-"file",
-
-pdfPath
-
-);
-
-expect(
-
-response.status
-
-).toBe(500);
-
-spy.mockRestore();
-
-});
-
-it("should handle embedding failure",async()=>{
-
-mockedEmbedding.mockRejectedValue(
-
-new Error("Embedding Error")
-
-);
-
-const spy=
-
-jest.spyOn(
-
-console,
-
-"error"
-
-)
-
-.mockImplementation(()=>{});
-
-const response=
-
-await request(app)
-
-.post("/api/notes/upload")
-
-.set(
-
-"Cookie",
-
-cookies
-
-)
-
-.attach(
-
-"file",
-
-pdfPath
-
-);
-
-expect(
-
-response.status
-
-).toBe(500);
-
-spy.mockRestore();
-
-});
-
-});
-
-

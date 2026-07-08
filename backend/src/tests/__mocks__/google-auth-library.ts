@@ -1,5 +1,8 @@
 export const verifyIdTokenMock = jest.fn();
 
-export class OAuth2Client {
-  verifyIdToken = verifyIdTokenMock;
-}
+// Ensure the class structure returns an object containing the tracked mock function when instantiated via 'new'
+export const OAuth2Client = jest.fn().mockImplementation(() => {
+  return {
+    verifyIdToken: verifyIdTokenMock,
+  };
+});
