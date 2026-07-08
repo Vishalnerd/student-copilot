@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getMyNotes, deleteNote, searchNotes } from "@/services/noteApi";
+import { subscribeToProgress } from "@/services/progressApi";
 import { Note } from "../../types/note";
 import Navbar from "@/app/components/layout/Navbar";
 import Sidebar from "@/app/components/layout/Sidebar";
-import MobileSidebar from "@/app/components/layout/MobileSIdebar"; // Casing matched with your layout folder
+import MobileSidebar from "@/app/components/layout/MobileSIdebar";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -18,13 +19,26 @@ import {
   FolderOpen,
   Search,
   X,
-  Menu, // Imported for the mobile menu trigger action
+  Menu,
+  Loader2,
+  Scissors,
+  Brain,
+  Database,
+  CircleAlert,
 } from "lucide-react";
 
+interface ExtendedNote extends Note {
+  status?: "queued" | "extracting" | "chunking" | "embedding" | "saving" | "completed" | "failed";
+  progress?: number;
+  progressMessage?: string;
+}
+
 export default function NotesPage() {
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useState<ExtendedNote[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const activeSubscriptionsRef = useRef<Record<string, any>>({});
 
   const getFileBadge = (fileName: string) => {
     const extension = fileName.split(".").pop()?.toUpperCase() || "PDF";
@@ -33,8 +47,8 @@ export default function NotesPage() {
 
   const getNoteTitle = (fileName: string) => {
     const withoutExtension = fileName.replace(/\.[^/.]+$/, "");
-    return withoutExtension.length > 28
-      ? `${withoutExtension.slice(0, 28)}...`
+    return withoutExtension.length > 24
+      ? `${withoutExtension.slice(0, 24)}...`
       : withoutExtension;
   };
 
@@ -43,46 +57,152 @@ export default function NotesPage() {
     if (ext === "DOCX" || ext === "DOC") {
       return {
         Icon: FileText,
-        bg: "bg-indigo-50 text-indigo-600 border border-indigo-100",
+        bg: "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-100/30 dark:border-indigo-900/30",
       };
     }
     if (ext === "JPG" || ext === "PNG" || ext === "JPEG") {
       return {
         Icon: ImageIcon,
-        bg: "bg-amber-50 text-amber-600 border border-amber-100",
+        bg: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-100/30 dark:border-amber-900/30",
       };
     }
     return {
       Icon: FileText,
-      bg: "bg-blue-50 text-blue-600 border border-blue-100",
+      bg: "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-100/30 dark:border-blue-900/30",
     };
   };
 
-  // Debounced Search Synchronization Logic
+  const getStatusIcon = (status?: string) => {
+    switch (status) {
+      case "queued":
+        return <Loader2 className="w-3.5 h-3.5 text-amber-500 animate-spin" />;
+      case "extracting":
+        return <FileText className="w-3.5 h-3.5 text-blue-500 animate-pulse" />;
+      case "chunking":
+        return <Scissors className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />;
+      case "embedding":
+        return <Brain className="w-3.5 h-3.5 text-purple-500 animate-pulse" />;
+      case "saving":
+        return <Database className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />;
+      case "failed":
+        return <CircleAlert className="w-3.5 h-3.5 text-red-500" />;
+      default:
+        return <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin" />;
+    }
+  };
+
+  const clearAllSubscriptions = () => {
+    Object.values(activeSubscriptionsRef.current).forEach((stream: any) => {
+      if (stream && typeof stream.close === "function") stream.close();
+    });
+    activeSubscriptionsRef.current = {};
+  };
+
+  useEffect(() => {
+    return () => clearAllSubscriptions();
+  }, []);
+
+  const syncProgressStreams = (fetchedNotes: ExtendedNote[]) => {
+    clearAllSubscriptions();
+
+    fetchedNotes.forEach((note) => {
+      // 💡 Match against your new active state criteria rules cleanly
+      const isPending = note.status !== "completed" && note.status !== "failed";
+
+      if (isPending) {
+        activeSubscriptionsRef.current[note._id] = subscribeToProgress(
+          note._id,
+          (update) => {
+            if (update.status === "failed") {
+              toast.error(`Analysis failed for "${getNoteTitle(note.fileName)}".`);
+              setNotes((prevNotes) => prevNotes.filter((n) => n._id !== note._id));
+
+              if (activeSubscriptionsRef.current[note._id]) {
+                activeSubscriptionsRef.current[note._id].close();
+                delete activeSubscriptionsRef.current[note._id];
+              }
+              return;
+            }
+
+            // 💡 Clean up syntax and target exact structural "completed" status mappings
+            if (update.status === "completed" || update.progress >= 100) {
+              setNotes((prevNotes) =>
+                prevNotes.map((n) =>
+                  n._id === note._id ? { ...n, status: "completed", progress: 100 } : n
+                )
+              );
+              toast.success(`"${getNoteTitle(note.fileName)}" is ready! 🎉`);
+
+              if (activeSubscriptionsRef.current[note._id]) {
+                activeSubscriptionsRef.current[note._id].close();
+                delete activeSubscriptionsRef.current[note._id];
+              }
+              return;
+            }
+
+            setNotes((prevNotes) =>
+              prevNotes.map((n) =>
+                n._id === note._id
+                  ? {
+                    ...n,
+                    status: update.status,
+                    progress: update.progress,
+                    progressMessage: update.message,
+                  }
+                  : n
+              )
+            );
+          },
+          () => {
+            setNotes((prevNotes) =>
+              prevNotes.map((n) =>
+                n._id === note._id ? { ...n, status: "completed", progress: 100 } : n
+              )
+            );
+            if (activeSubscriptionsRef.current[note._id]) {
+              activeSubscriptionsRef.current[note._id].close();
+              delete activeSubscriptionsRef.current[note._id];
+            }
+          }
+        );
+      }
+    });
+  };
+
   useEffect(() => {
     setLoading(true);
     const timer = setTimeout(() => {
       if (search.trim() === "") {
         getMyNotes()
-          .then(setNotes)
+          .then((data) => {
+            setNotes(data);
+            syncProgressStreams(data);
+          })
           .catch(() => toast.error("Failed to load notes"))
           .finally(() => setLoading(false));
       } else {
         searchNotes(search)
-          .then(setNotes)
+          .then((data) => {
+            setNotes(data);
+            syncProgressStreams(data);
+          })
           .catch(() => toast.error("Search failed"))
           .finally(() => setLoading(false));
       }
-    }, 500); // 500ms debounce buffer delay
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [search]);
 
   const handleDelete = async (id: string) => {
     try {
-      if (!window.confirm("Are you sure you want to delete this note?")) {
-        return;
+      if (!window.confirm("Are you sure you want to delete this note?")) return;
+
+      if (activeSubscriptionsRef.current[id]) {
+        activeSubscriptionsRef.current[id].close();
+        delete activeSubscriptionsRef.current[id];
       }
+
       await deleteNote(id);
       setNotes((prev) => prev.filter((note) => note._id !== id));
       toast.success("Note deleted successfully");
@@ -94,13 +214,10 @@ export default function NotesPage() {
 
   return (
     <ProtectedRoute>
-      {/* 💡 Upgraded background container using v4 semantic design tokens */}
       <div className="flex min-h-screen bg-background text-foreground transition-colors duration-200">
         <Sidebar />
 
-        {/* 💡 Fluid canvas shell handling dark-mode background blend filters and responsive width alignments */}
         <div className="flex flex-1 flex-col bg-slate-50 dark:bg-slate-900/40 transition-colors duration-200 ml-0 lg:ml-64">
-          {/* Connected Navbar containing the responsive MobileSidebar Primitive Trigger */}
           <Navbar
             mobileMenuTrigger={
               <MobileSidebar
@@ -115,7 +232,6 @@ export default function NotesPage() {
 
           <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
             <div className="space-y-6">
-              {/* Integrated Modern Search Bar Box Container */}
               <div className="relative w-full max-w-xl">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
@@ -137,7 +253,6 @@ export default function NotesPage() {
                 )}
               </div>
 
-              {/* Title Header Section */}
               <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold">
@@ -159,7 +274,6 @@ export default function NotesPage() {
                 </Link>
               </div>
 
-              {/* View Output Layer */}
               {loading ? (
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {[1, 2, 3].map((item) => (
@@ -170,15 +284,12 @@ export default function NotesPage() {
                   ))}
                 </div>
               ) : notes.length === 0 ? (
-                /* Empty Fallback Wrapper */
                 <div className="rounded-2xl border border-dashed border-gray-300 dark:border-gray-800 bg-white dark:bg-slate-800 p-12 text-center shadow-2xs max-w-xl mx-auto mt-6">
                   <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-gray-50 dark:bg-slate-900 text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-gray-800">
                     <FolderOpen className="w-6 h-6" />
                   </div>
                   <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">
-                    {search.trim() !== ""
-                      ? "No matching notes found"
-                      : "No notes yet"}
+                    {search.trim() !== "" ? "No matching notes found" : "No notes yet"}
                   </h2>
                   <p className="mt-1 text-sm text-gray-400 dark:text-gray-500 max-w-xs mx-auto leading-normal">
                     {search.trim() !== ""
@@ -195,22 +306,27 @@ export default function NotesPage() {
                   )}
                 </div>
               ) : (
-                /* Active Notes Card Layout Grid */
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {notes.map((note) => {
                     const { Icon, bg } = getFileIconConfig(note.fileName);
                     const chatCount = (note as any).chatCount ?? 0;
 
+                    const isCompiling = note.status && note.status !== "completed" && note.status !== "failed";
+                    const isFailed = note.status === "failed";
+
                     return (
                       <article
                         key={note._id}
-                        className="group rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-800/80 p-4 sm:p-5 transition hover:-translate-y-0.5 hover:shadow-md dark:hover:border-blue-500/40 flex flex-col justify-between"
+                        className={`group rounded-2xl border bg-white dark:bg-slate-800/80 p-4 sm:p-5 transition flex flex-col justify-between h-56 ${isCompiling
+                          ? "border-blue-200 dark:border-blue-900/50 shadow-xs select-none"
+                          : isFailed
+                            ? "border-red-200 dark:border-red-900/50 bg-red-50/10"
+                            : "border-gray-200 dark:border-gray-800 hover:-translate-y-0.5 hover:shadow-md dark:hover:border-blue-500/40"
+                          }`}
                       >
-                        <div>
-                          <div className="mb-4 flex items-start justify-between">
-                            <div
-                              className={`flex h-10 w-10 items-center justify-center rounded-xl ${bg}`}
-                            >
+                        <div className="min-w-0 w-full">
+                          <div className="mb-3 flex items-start justify-between">
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${bg}`}>
                               <Icon className="w-5 h-5" />
                             </div>
                             <span className="rounded-md bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 text-[10px] font-bold tracking-wide text-blue-600 dark:text-blue-400 border border-blue-100/30 dark:border-blue-900/30">
@@ -218,52 +334,98 @@ export default function NotesPage() {
                             </span>
                           </div>
 
-                          <Link
-                            href={`/notes/${note._id}`}
-                            className="block group/link cursor-pointer"
-                          >
-                            <h2 className="text-base font-bold text-gray-900 dark:text-slate-100 transition line-clamp-1 group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                              {getNoteTitle(note.fileName)}
-                            </h2>
-                            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500 font-medium">
-                              Uploaded on{" "}
-                              {new Date(note.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
+                          {isCompiling ? (
+                            <div className="block space-y-2 w-full">
+                              <h2 className="text-base font-bold text-gray-400 dark:text-gray-500 line-clamp-1">
+                                {getNoteTitle(note.fileName)}
+                              </h2>
+
+                              <div className="space-y-1.5 pt-0.5 w-full">
+                                <div className="flex items-center justify-between text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                                  <span className="flex items-center gap-1.5 truncate max-w-[75%]">
+                                    {getStatusIcon(note.status)}
+                                    <span className="truncate">{note.progressMessage || "Queueing background tasks..."}</span>
+                                  </span>
+                                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                                    {Math.round(note.progress || 0)}%
+                                  </span>
+                                </div>
+                                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-300 ease-out"
+                                    style={{ width: `${note.progress || 0}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ) : isFailed ? (
+                            <div className="block space-y-1">
+                              <h2 className="text-base font-bold text-red-700 dark:text-red-400 line-clamp-1 line-through">
+                                {getNoteTitle(note.fileName)}
+                              </h2>
+                              <p className="text-xs text-red-500 font-medium flex items-center gap-1">
+                                <CircleAlert className="w-3.5 h-3.5" />
+                                Processing execution aborted.
+                              </p>
+                            </div>
+                          ) : (
+                            <Link href={`/notes/${note._id}`} className="block group/link cursor-pointer">
+                              <h2 className="text-base font-bold text-gray-900 dark:text-slate-100 transition line-clamp-1 group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                                {getNoteTitle(note.fileName)}
+                              </h2>
+                              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500 font-medium">
+                                Uploaded on{" "}
+                                {new Date(note.createdAt).toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "2-digit",
                                   year: "numeric",
-                                },
-                              )}
-                            </p>
-                          </Link>
+                                })}
+                              </p>
+                            </Link>
+                          )}
                         </div>
 
-                        {/* Bottom Action Section Container */}
-                        <div className="mt-5 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-700/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 font-medium">
+                        <div className="mt-4 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-700/60 pt-3.5 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
                             <MessageSquare className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                            <span>{chatCount} Chats</span>
+                            <span>{isCompiling ? "Calculating..." : `${chatCount} Chats`}</span>
                           </div>
 
                           <div className="flex items-center gap-2">
                             <button
+                              disabled={isCompiling}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(note._id);
                               }}
-                              className="rounded-lg p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition hover:text-red-600 cursor-pointer"
+                              className="rounded-lg p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition hover:text-red-600 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
                               aria-label={`Delete ${note.fileName}`}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
 
-                            <Link
-                              href={`/notes/${note._id}`}
-                              className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 px-4 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 border border-blue-100/30 dark:border-blue-900/20 transition hover:bg-blue-100 dark:hover:bg-blue-900/40"
-                            >
-                              Open
-                            </Link>
+                            {isCompiling ? (
+                              <button
+                                disabled
+                                className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-gray-400 dark:text-gray-500 border border-transparent select-none cursor-not-allowed"
+                              >
+                                Analyzing...
+                              </button>
+                            ) : isFailed ? (
+                              <button
+                                onClick={() => handleDelete(note._id)}
+                                className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/30 px-4 py-2 text-xs font-bold text-red-600 dark:text-red-400 border border-red-100/20 dark:border-red-900/30 hover:bg-red-100"
+                              >
+                                Clear Error
+                              </button>
+                            ) : (
+                              <Link
+                                href={`/notes/${note._id}`}
+                                className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 px-4 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 border border-blue-100/30 dark:border-blue-900/20 transition hover:bg-blue-100 dark:hover:bg-blue-900/40"
+                              >
+                                Open
+                              </Link>
+                            )}
                           </div>
                         </div>
                       </article>

@@ -4,15 +4,7 @@ import mongoose,
  Schema,
 } from "mongoose";
 
-export interface INote
- extends Document {
 
- userId: string;
-
- fileName: string;
-
- filePath: string;
-}
 
 const NoteSchema =
  new Schema(
@@ -41,7 +33,11 @@ const NoteSchema =
       type: String,
       default: "",
     },
-
+    status: {
+  type: String,
+  enum: ["processing", "completed", "failed"],
+  default: "processing",
+},
  },
  {
    timestamps: true,

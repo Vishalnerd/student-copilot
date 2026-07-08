@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import User from "../models/user";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env" });
 
 let mongo: MongoMemoryServer;
 

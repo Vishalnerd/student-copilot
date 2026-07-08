@@ -31,6 +31,18 @@ embedding: {
   timestamps:true,
 });
 
+NoteChunkSchema.index({
+  noteId: 1,
+  userId: 1,
+});
+
+NoteChunkSchema.index({
+  noteId: 1,
+});
+
+NoteChunkSchema.index({
+  userId: 1,
+});
 export default mongoose.model(
  "NoteChunk",
  NoteChunkSchema

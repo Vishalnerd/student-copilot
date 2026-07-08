@@ -24,22 +24,28 @@ export default function RegisterPage() {
   const {
     user,
     loading: authLoading,
-
     loginWithGoogle,
     registerWithPassword,
   } = useAuth();
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [mounted, setMounted] = useState(false); // 💡 Tracks hydration mounts to block layout shifts
 
-  // 🛡️ SECURITY GUARD: If the user is already authenticated, redirect them automatically away from auth pages
+  // 1. Force immediate mounting context to eliminate server-side hydration delay
   useEffect(() => {
-    if (!authLoading && user) {
+    setMounted(true);
+  }, []);
+
+  // 2. Redirect authenticated users cleanly away from auth forms
+  useEffect(() => {
+    if (mounted && !authLoading && user) {
       router.replace("/dashboard");
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, mounted, router]);
 
   const handleGoogleAuth = async (credentialResponse: CredentialResponse) => {
     try {
@@ -49,11 +55,8 @@ export default function RegisterPage() {
       }
 
       setLoading(true);
-
       await loginWithGoogle(credentialResponse.credential);
-
       toast.success("Welcome!");
-
       router.replace("/dashboard");
     } catch (error: any) {
       toast.error(error?.response?.data?.message ?? "Google Sign Up Failed");
@@ -77,8 +80,6 @@ export default function RegisterPage() {
 
     try {
       setLoading(true);
-
-      // 🚀 Clean API submission matching your Express register endpoint params
       await registerWithPassword(
         fullName.trim(),
         email.toLowerCase().trim(),
@@ -86,12 +87,9 @@ export default function RegisterPage() {
       );
 
       toast.success("Account created successfully! 🎉");
-
-      // Clear navigation history stack during redirection bounds
       router.replace("/dashboard");
     } catch (error: any) {
-      const serverMessage =
-        error?.response?.data?.message || error?.response?.data?.error;
+      const serverMessage = error?.response?.data?.message || error?.response?.data?.error;
       toast.error(serverMessage || "Registration failed");
       console.error("Backend Registry Rejection Log:", error?.response?.data);
     } finally {
@@ -99,10 +97,12 @@ export default function RegisterPage() {
     }
   };
 
-  // 🔄 Prevent form flickering while app evaluates active cookie environments on boot
-  if (authLoading) {
+  // 3. 💡 THE SPEED FIX: Stop trapping users on the loading screen! 
+  // If the browser hasn't completed mounting, or if the cookies are being read 
+  // but NO valid logged-in user session exists, let them view the registration form immediately.
+  if (!mounted || (authLoading && !user)) {
     return (
-      <div className="min-h-screen bg-[#faf8ff] flex flex-col items-center justify-center space-y-3">
+      <div className="min-h-screen bg-[#faf8ff] flex flex-col items-center justify-center space-y-3 px-4">
         <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
         <p className="text-[10px] font-mono font-bold tracking-wider text-gray-400 uppercase">
           Verifying session status...
@@ -113,124 +113,97 @@ export default function RegisterPage() {
 
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] bg-[radial-gradient(at_0%_0%,_hsla(217,100%,95%,1)_0,_transparent_50%),_radial-gradient(at_100%_0%,_hsla(245,100%,96%,1)_0,_transparent_50%),_radial-gradient(at_50%_100%,_hsla(217,100%,98%,1)_0,_transparent_50%)] px-4 py-8 sm:px-6">
-      {/* Background Glowing Accents */}
       <div className="absolute top-[-15%] right-[-10%] h-[260px] w-[260px] rounded-full bg-blue-600/5 blur-[100px] sm:h-[500px] sm:w-[500px] pointer-events-none" />
       <div className="absolute bottom-[-15%] left-[-10%] h-[260px] w-[260px] rounded-full bg-indigo-600/5 blur-[100px] sm:h-[500px] sm:w-[500px] pointer-events-none" />
 
       <main className="relative z-10 flex w-full max-w-md flex-col justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-        {/* Logo */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/20 sm:h-14 sm:w-14">
             <Sparkles className="h-6 w-6 fill-white text-white sm:h-7 sm:w-7" />
           </div>
-
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-900">
             Student Copilot
           </h1>
-
           <p className="mt-1 text-sm font-medium text-gray-500">
             Your journey to academic excellence begins here.
           </p>
         </div>
 
-        {/* Card */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-md sm:p-8">
           <form onSubmit={handleRegister} className="space-y-6">
-            {/* Full Name */}
             <div className="space-y-2">
-              <label
-                htmlFor="full_name"
-                className="block text-[11px] font-mono font-bold uppercase tracking-wider text-gray-500"
-              >
+              <label htmlFor="full_name" className="block text-[11px] font-mono font-bold uppercase tracking-wider text-gray-500">
                 Full Name
               </label>
-
               <div className="relative rounded-lg transition-all group focus-within:scale-[1.01]">
                 <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-600">
                   <User className="h-4 w-4" />
                 </div>
-
                 <input
                   id="full_name"
                   type="text"
                   placeholder="Alex Johnson"
                   value={fullName}
+                  disabled={loading}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 py-3 pl-11 pr-4 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
                 />
               </div>
             </div>
 
-            {/* Email */}
             <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="block text-[11px] font-mono font-bold uppercase tracking-wider text-gray-500"
-              >
+              <label htmlFor="email" className="block text-[11px] font-mono font-bold uppercase tracking-wider text-gray-500">
                 Email Address
               </label>
-
               <div className="relative rounded-lg transition-all group focus-within:scale-[1.01]">
                 <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-600">
                   <Mail className="h-4 w-4" />
                 </div>
-
                 <input
                   id="email"
                   type="email"
                   placeholder="name@university.edu"
                   value={email}
+                  disabled={loading}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 py-3 pl-11 pr-4 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
                 />
               </div>
             </div>
 
-            {/* Password */}
             <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="block text-[11px] font-mono font-bold uppercase tracking-wider text-gray-500"
-              >
+              <label htmlFor="password" className="block text-[11px] font-mono font-bold uppercase tracking-wider text-gray-500">
                 Password
               </label>
-
               <div className="relative rounded-lg transition-all group focus-within:scale-[1.01]">
                 <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-600">
                   <Lock className="h-4 w-4" />
                 </div>
-
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••••••"
                   value={password}
+                  disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 pl-11 pr-11 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 py-3 pl-11 pr-11 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-blue-600"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-
               <p className="px-1 text-[11px] font-medium text-gray-400">
                 Must be at least 8 characters long.
               </p>
             </div>
 
-            {/* Register Button */}
             <button
               type="submit"
               disabled={loading}
@@ -249,18 +222,15 @@ export default function RegisterPage() {
               )}
             </button>
 
-            {/* Divider */}
             <div className="relative flex items-center justify-center py-2">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200/60"></div>
               </div>
-
               <span className="relative bg-white px-4 text-[10px] font-mono font-bold uppercase tracking-wider text-gray-400">
                 Or sign up with
               </span>
             </div>
 
-            {/* Google */}
             <div className="flex justify-center w-full max-w-sm mx-auto overflow-hidden">
               <GoogleLogin
                 onSuccess={handleGoogleAuth}
@@ -274,14 +244,10 @@ export default function RegisterPage() {
             </div>
           </form>
 
-          {/* Footer */}
           <div className="mt-6 space-y-4 text-center">
             <p className="text-xs font-medium text-gray-500">
               Already have an account?{" "}
-              <Link
-                href="/login"
-                className="font-bold text-blue-600 hover:underline"
-              >
+              <Link href="/login" className="font-bold text-blue-600 hover:underline">
                 Login here
               </Link>
             </p>
@@ -300,7 +266,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Bottom badges */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
           <div className="flex items-center gap-1.5 text-gray-400">
             <ShieldCheck className="h-4 w-4" />
@@ -308,7 +273,6 @@ export default function RegisterPage() {
               Secure Data
             </span>
           </div>
-
           <div className="flex items-center gap-1.5 text-gray-400">
             <Zap className="h-4 w-4" />
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider">

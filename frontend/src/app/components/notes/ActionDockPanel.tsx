@@ -63,16 +63,10 @@ export default function ActionDockPanel({
 
       {/* Input */}
       <div
-        className={`mx-auto mt-3 flex max-w-3xl items-center rounded-xl border border-gray-200 dark:border-gray-700/80 bg-slate-50 dark:bg-slate-800/60 px-2 sm:px-3 py-1.5 shadow-inner transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 ${
-          disabled ? "cursor-not-allowed select-none opacity-60" : ""
-        }`}
+        className={`mx-auto mt-3 flex max-w-3xl items-center rounded-xl border border-gray-200 dark:border-gray-700/80 bg-slate-50 dark:bg-slate-800/60 px-2 sm:px-3 py-1.5 shadow-inner transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 ${disabled ? "cursor-not-allowed select-none opacity-60" : ""
+          }`}
       >
-        <button
-          disabled={disabled}
-          className="rounded-lg p-2 text-gray-400 transition hover:text-gray-600 dark:text-gray-500 dark:hover:text-slate-300 disabled:pointer-events-none"
-        >
-          <Paperclip className="h-4 w-4" />
-        </button>
+
 
         <input
           type="text"

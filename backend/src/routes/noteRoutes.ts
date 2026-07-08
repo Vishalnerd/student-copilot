@@ -1,6 +1,7 @@
 import express from "express";
 import { uploadNote,getMyNotes,getNoteById,deleteNote,searchNotes } from "../controllers/noteController";
-import { askQuestion,getChatHistory } from "../controllers/chatController";
+import { getChatHistory,streamChat } from "../controllers/chatController";
+import { streamProgress } from "../controllers/progressController";
 import {protect} from "../middleware/authMiddleware";
 import { aiLimiter } from "../middleware/rateLimiter";
 import multer from "../config/multer"
@@ -53,15 +54,25 @@ router.get(
  getNoteById
 );
 /**
- * @route POST /api/notes/:id/ask
- * @desc Ask a question about a specific note
+ * @route POST /api/notes/:id/stream
+ * @desc Stream AI response for a given prompt
  * @access Private
  */
 router.post(
- "/:id/ask",
+ "/:id/stream",
  protect,
  aiLimiter,
- askQuestion
+ streamChat
+);
+/**
+ * @route GET /api/notes/:noteId/progress/stream
+ * @desc Stream progress updates for a specific note
+ * @access Private
+ */
+router.get(
+  "/:noteId/progress/stream",
+  protect,
+  streamProgress
 );
 
 /**

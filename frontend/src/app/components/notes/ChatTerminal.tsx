@@ -10,22 +10,32 @@ interface ChatTerminalProps {
   chats: ChatMessage[];
   chatEndRef: RefObject<HTMLDivElement | null>;
   handleCopy: (text: string) => void;
+  askingQuestion: boolean;
 }
 
-export default function ChatTerminal({
-  disabledInput,
-  chats,
-  chatEndRef,
-  handleCopy,
-}: ChatTerminalProps) {
+export default function ChatTerminal(
+  {
+    disabledInput,
+    chats,
+    chatEndRef,
+    handleCopy,
+    askingQuestion,
+  }: ChatTerminalProps) {
+
   return (
     <div
-      className={`flex-1 overflow-y-auto bg-transparent px-3 py-4 sm:px-5 sm:py-6 lg:p-6 space-y-5 ${
-        disabledInput ? "select-none" : ""
-      }`}
+      className={`flex-1 overflow-y-auto bg-transparent px-3 py-4 sm:px-5 sm:py-6 lg:p-6 space-y-5 ${disabledInput ? "select-none" : ""
+        }`}
     >
       {chats.map((chat) => (
-        <div key={chat._id} className="mx-auto max-w-3xl space-y-5">
+
+        <div
+          id={chat._id}
+          key={chat._id}
+          className={`mx-auto max-w-3xl space-y-5 scroll-mt-6 rounded-2xl transition-all duration-500 ${chat.answer === null ? "animate-pulse" : ""
+            }`}
+        >
+
           {/* User Message */}
           {chat.question && (
             <div className="flex justify-end items-start gap-2 sm:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -59,7 +69,14 @@ export default function ChatTerminal({
               ) : (
                 <div className="prose prose-sm dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 font-medium leading-relaxed overflow-hidden">
                   <div className="markdown-content break-words overflow-x-auto">
-                    <Markdown>{chat.answer}</Markdown>
+                    <Markdown>
+                      {chat.answer}
+                    </Markdown>
+                    {askingQuestion && chat.answer !== null && (
+                      <span className="ml-1 animate-pulse text-blue-600">
+                        ▋
+                      </span>
+                    )}
                   </div>
                 </div>
               )}

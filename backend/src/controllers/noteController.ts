@@ -5,92 +5,47 @@ import Chat from "../models/Chat";
 import { Request, Response } from "express";
 import fs from "fs";
 import  extractPdfText  from "../utils/extractPdfText";
-import {generateEmbedding} from "../services/ai/embeddingService";
+import { pdfQueue } from "../jobs/pdfQueue";
 import chunkText from "../utils/chunkText";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 
-
-export const uploadNote =
- async (
+export const uploadNote = async (
   req: AuthRequest,
   res: Response
- ) => {
+) => {
+  try {
+    const file = req.file;
 
- try {
+    if (!file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
+    }
 
-  const file =
-   req.file;
-
-  if(!file){
-
-   return res
-    .status(400)
-    .json({
-      message:
-       "No file uploaded",
+    const note = await Note.create({
+      userId: req.userId,
+      fileName: file.originalname,
+      filePath: file.path,
+      status: "processing",
     });
 
+    await pdfQueue.add("process-pdf", {
+      noteId: note._id.toString(),
+    });
+
+    return res.status(202).json({
+      message: "PDF queued successfully",
+      note,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Server Error",
+    });
   }
-  const content =
- await extractPdfText(
-   file.path
- );
- const chunks =
- chunkText(content);
- 
-  const note =
-   await Note.create({
-
-    userId:
-     req.userId,
-
-    fileName:
-     file.originalname,
-
-    filePath:
-     file.path,
-    
-    content,
-   });
-   for(
-const [index,chunk]
-of chunks.entries()
-){
-
-const embedding =
-await generateEmbedding(
-chunk
-);
-
-await NoteChunk.create({
-
-noteId:note._id,
-
-userId:req.userId,
-
-chunkIndex:index,
-
-content:chunk,
-
-embedding
-
-});
-
-}
-  res.status(201)
-   .json(note);
-
- } catch(error){
-  console.error(error);
-  res.status(500)
-   .json({
-     message:
-      "Server Error",
-   });
-
- }
-
 };
 
 export const getMyNotes = async (

@@ -1,124 +1,107 @@
 import { Request, Response } from "express";
-import Note from "../models/note";
-import { generateAIResponse } from "../services/ai/geminiService";
-import { generateEmbedding } from "../services/ai/embeddingService";
-import NoteChunk from "../models/NoteChunk";
+import { generateAIStream } from "../services/ai/geminiService";
+import  {buildRagPrompt}  from "../services/ai/ragService";
 import Chat from "../models/Chat";
-import { cosineSimilarity } from "../utils/cosineSimilarity";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { getCachedAnswer, cacheAnswer } from "../services/cache/cacheService";
 
-export const askQuestion = async (
+export const streamChat = async (
   req: AuthRequest,
   res: Response
 ) => {
+  const { question } = req.body;
+
+  if (!question?.trim()) {
+    return res.status(400).json({
+      message: "Question is required",
+    });
+  }
+
   try {
-    const { question } = req.body;
+    // 1. Establish SSE headers immediately up front so the browser connection locks in cleanly
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.setHeader("content-encoding", "Identity");
+    res.flushHeaders();
 
-    if (!question?.trim()) {
-      return res.status(400).json({
-        message: "Question is required",
-      });
-    }
-
-    const questionEmbedding = await generateEmbedding(question);
-
-
-    const note = await Note.findOne({
-      _id: req.params.id,
-      userId: req.userId,
-    });
-
-    if (!note) {
-      return res.status(404).json({
-        message: "Note not found",
-      });
-    }
-
-    const chunks = await NoteChunk.find({
-      noteId: note._id,
-      userId: req.userId,
-    });
-
-    if (!chunks.length) {
-      return res.status(404).json({
-        message: "No chunks found for this note",
-      });
-    }
-
-   const scoredChunks =
-    chunks.map(chunk => ({
-
-    chunk,
-
-    score: cosineSimilarity(
-      questionEmbedding,
-      chunk.embedding
-    ),
-
-    }));
-
-    scoredChunks.sort(
-    (a,b)=>
-
-    b.score-a.score
+    // 2. Look for your Redis cache hit
+    const cachedAnswer = await getCachedAnswer(
+      req.userId!,
+      String(req.params.id),
+      question
     );
 
-const context =
-  scoredChunks
+    if (cachedAnswer) {
+      console.log("⚡ Redis Cache Hit");
 
-    .slice(0,5)
+      // Write your custom event indicator matching your frontend subscription rules
+      res.write(`event:token\n`);
+      res.write(`data: ${JSON.stringify({ token: cachedAnswer })}\n\n`);
 
-    .map(
-      item =>
-        item.chunk.content
-    )
+      // Flush your finish completion boundary handles
+      res.write("event: done\n");
+      res.write("data: {}\n\n");
+      res.end();
+      return;
+    }
 
-    .join("\n\n");
-
-    const answer = await generateAIResponse(
-      `You are a study AI assistant. Answer the question based on the following context as:-
-        1. If the answer is not present in the context, say "I don't know".
-        2. If the answer is present, provide a concise and clear answer.
-        3. If the answer is present in multiple chunks, combine the information to provide a comprehensive answer.
-        4. If the answer is present in one chunk, provide the answer from that chunk.
-        5. If the answer is present in multiple chunks, provide the answer from the chunk that has the most relevant information.
-
-Question: ${question}
-
-Context: ${context}`
+    console.log("❌ Cache Miss");
+    const {
+      prompt,
+      note,
+    } = await buildRagPrompt(
+      String(req.params.id),
+      req.userId!,
+      question
     );
-    await Chat.create({
 
- userId:req.userId,
+    let disconnected = false;
 
- noteId:
-  note._id,
-
- question,
-
- answer,
-
-});
-
-
-    return res.status(200).json({
-      question,
-      answer,
-      chunksUsed: Math.min(
-        scoredChunks.length,
-        5
-      ),
+    req.on("close", () => {
+      disconnected = true;
     });
 
+    const stream = await generateAIStream(prompt);
+    let fullAnswer = "";
+
+    for await (const chunk of stream) {
+      if (disconnected) break;
+
+      const text = chunk.text;
+      if (!text) continue;
+
+      fullAnswer += text;
+
+      res.write(`event:token\n`);
+      res.write(`data: ${JSON.stringify({ token: text })}\n\n`);
+    }
+
+    if (!disconnected) {
+      await Chat.create({
+        userId: req.userId,
+        noteId: note._id,
+        question,
+        answer: fullAnswer,
+      });
+
+      res.write("event: done\n");
+      res.write("data: {}\n\n");
+
+      await cacheAnswer(
+        req.userId!,
+        note._id.toString(),
+        question,
+        fullAnswer
+      );
+    }
+
+    res.end();
   } catch (error) {
-    console.error(
-      "Ask Question Error:",
-      error
-    );
-
-    return res.status(500).json({
-      message: "Server Error",
-    });
+    console.error(error);
+    // Since headers are flushed at the top, we just end the open request channel cleanly
+    res.end();
   }
 };
 
