@@ -25,6 +25,9 @@ jest.mock("../../services/bullmq/progressManager", () => ({
   progressManager: {
     send: jest.fn(),
     get: jest.fn().mockReturnValue({ status: "processing" }),
+    clear: jest.fn(),
+    subscribe: jest.fn(),
+    unsubscribe: jest.fn(),
   },
 }));
 
