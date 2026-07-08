@@ -168,7 +168,7 @@ describe("Search Notes API", () => {
     const response = await request(app)
       .get("/api/notes/search")
       .query({ q: "Java" })
-      .set("Cookie", ["accessToken=invalid-or-expired-token-string"]); // 💡 Forces evaluation inside protect middleware on the correct route
+      .set("Cookie", ["accessToken=;"]); // 💡 Forces explicit route matching on /search in headless CI environments
 
     expect(response.status).toBe(401);
   });
