@@ -74,7 +74,7 @@ describe("Summary API", () => {
 
         fileName: "java.pdf",
 
-        filePath: "/tmp/java.pdf",
+        fileUrl: "/tmp/java.pdf",
 
         content:
           "Java is an object oriented programming language.",

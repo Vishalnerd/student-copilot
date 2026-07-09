@@ -49,7 +49,7 @@ describe("BullMQ Worker: processPdf() Pipeline", () => {
     const note = await Note.create({
       userId: mockUserId,
       fileName: "sample.pdf",
-      filePath: "/uploads/sample.pdf",
+      fileUrl: "/uploads/sample.pdf",
       status: "processing",
     });
     

@@ -14,7 +14,7 @@ describe("Delete Note API", () => {
   let cookies: string;
   let noteId: string;
   let userId: string;
-  let filePath: string;
+  let fileUrl: string;
 
   beforeEach(async () => {
 
@@ -54,11 +54,11 @@ describe("Delete Note API", () => {
     cookies =
       login.headers["set-cookie"];
 
-    filePath =
-      "test-delete.pdf";
+    fileUrl =
+      "/tmp/delete.pdf";
 
     fs.writeFileSync(
-      filePath,
+      fileUrl,
       "dummy"
     );
 
@@ -69,7 +69,7 @@ describe("Delete Note API", () => {
 
         fileName: "Delete.pdf",
 
-        filePath,
+        fileUrl,
 
         content: "Delete Me",
 
@@ -109,9 +109,9 @@ describe("Delete Note API", () => {
   afterEach(() => {
 
     if (
-      fs.existsSync(filePath)
+      fs.existsSync(fileUrl)
     ) {
-      fs.unlinkSync(filePath);
+      fs.unlinkSync(fileUrl);
     }
 
   });
@@ -208,7 +208,7 @@ describe("Delete Note API", () => {
       );
 
     expect(
-      fs.existsSync(filePath)
+      fs.existsSync(fileUrl)
     ).toBe(false);
 
   });

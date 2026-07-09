@@ -52,7 +52,7 @@ describe("POST /api/notes/:id/stream - Real-time SSE Stream Engine Suite", () =>
     noteDocument = await Note.create({
       userId,
       fileName: "sample.pdf",
-      filePath: "/uploads/sample.pdf",
+      fileUrl: "/uploads/sample.pdf",
       status: "completed",
     });
     noteId = noteDocument._id.toString();

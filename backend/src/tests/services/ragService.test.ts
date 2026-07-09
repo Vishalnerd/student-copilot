@@ -35,7 +35,7 @@ describe("RAG Engine Service Sandbox: buildRagPrompt()", () => {
       _id: noteId,
       userId: userId,
       fileName: "computer-science.pdf",
-      filePath: "/uploads/cs.pdf",
+      fileUrl: "/uploads/cs.pdf",
       status: "completed",
     });
   });

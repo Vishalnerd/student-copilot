@@ -102,7 +102,7 @@ describe("Dashboard API", () => {
 
         fileName: "Java.pdf",
 
-        filePath: "/tmp/java.pdf",
+        fileUrl: "/tmp/java.pdf",
 
         content: "Java",
 
@@ -115,7 +115,7 @@ describe("Dashboard API", () => {
 
         fileName: "Node.pdf",
 
-        filePath: "/tmp/node.pdf",
+        fileUrl: "/tmp/node.pdf",
 
         content: "Node",
 
@@ -238,7 +238,7 @@ describe("Dashboard API", () => {
 
       fileName: "Other.pdf",
 
-      filePath: "/tmp/other.pdf",
+      fileUrl: "/tmp/other.pdf",
 
       content: "Other",
 
