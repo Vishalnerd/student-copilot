@@ -2,107 +2,149 @@
 
 # 🎓 Student Copilot
 
-An AI-powered study assistant that transforms PDF notes into interactive learning experiences using **RAG (Retrieval-Augmented Generation)**, **Google Gemini AI**, and **MongoDB Vector Search**.
+An AI-powered study assistant that transforms PDF notes into interactive learning experiences using **Retrieval-Augmented Generation (RAG)**, **Google Gemini AI**, **MongoDB Atlas Vector Search**, **Redis**, and **BullMQ**.
 
-Students can upload lecture notes, ask questions about their documents, generate AI summaries, flashcards, quizzes, and monitor their study progress through a dashboard.
+Students can upload lecture notes, chat with their PDFs using AI, generate summaries, flashcards, quizzes, and track learning progress through an interactive dashboard.
 
 ---
 
-## 🚀 Features
+# ✨ Features
 
-### 🔐 Authentication
+## 🔐 Authentication
 
 - JWT Authentication
 - Access & Refresh Token Architecture
 - Refresh Token Rotation
 - Hashed Refresh Tokens
+- HTTP-only Cookies
 - Protected Routes
 - Zod Validation
 - Rate Limiting
 
 ---
 
-### 📄 Notes
+## 📄 PDF Processing
 
 - Upload PDF Notes
+- Background PDF Processing (BullMQ)
 - Automatic PDF Text Extraction
-- Chunking Large Documents
-- Generate Vector Embeddings
-- Store Embeddings in MongoDB
+- Intelligent Text Chunking
+- AI Embedding Generation
+- MongoDB Atlas Vector Storage
+- Real-time Processing Progress (SSE)
 - Search Notes
 - Delete Notes
 
 ---
 
-### 🤖 AI Features
+## 🤖 AI Features
 
-- Ask Questions using RAG
-- AI Generated Summaries
+- AI Chat with PDFs
+- Streaming AI Responses (SSE)
+- Retrieval-Augmented Generation (RAG)
+- MongoDB Atlas Vector Search
+- AI Summaries
 - AI Flashcards
 - AI Quizzes
 - Recent AI Conversations
 
 ---
 
-### 📊 Dashboard
+## ⚡ Performance Optimizations
 
-Displays
+- Redis Embedding Cache
+- MongoDB Atlas Vector Search
+- Background Job Processing
+- Streaming Responses
+- Axios Token Refresh Queue
+- Parallel-safe Refresh Token Handling
+
+---
+
+## 📊 Dashboard
 
 - Total Notes
-- Total Questions Asked
+- Total AI Questions
 - Total Flashcards
 - Total Quizzes
-- Recent Uploaded Notes
+- Recently Uploaded Notes
 
 ---
 
-### 🧠 Retrieval Augmented Generation (RAG)
+# 🧠 RAG Pipeline
 
-Workflow
-
-```
-Upload PDF
-      │
-      ▼
-Extract Text
-      │
-      ▼
-Chunk Text
-      │
-      ▼
-Generate Embeddings
-      │
-      ▼
-Store in MongoDB
-      │
-      ▼
-User asks Question
-      │
-      ▼
-Vector Search
-      │
-      ▼
-Top Relevant Chunks
-      │
-      ▼
-Gemini AI
-      │
-      ▼
-Final Answer
+```text
+                Upload PDF
+                     │
+                     ▼
+          Background Worker (BullMQ)
+                     │
+                     ▼
+            Extract PDF Text
+                     │
+                     ▼
+            Smart Text Chunking
+                     │
+                     ▼
+       Generate Embeddings (Gemini)
+                     │
+                     ▼
+      Store Vectors (MongoDB Atlas)
+                     │
+──────────────────────────────────────────
+                     │
+              User asks question
+                     │
+                     ▼
+         Generate Question Embedding
+                     │
+                     ▼
+       MongoDB Atlas Vector Search
+                     │
+                     ▼
+          Retrieve Relevant Chunks
+                     │
+                     ▼
+          Build RAG Prompt
+                     │
+                     ▼
+        Gemini 2.5 Flash Streaming
+                     │
+                     ▼
+         Stream AI Response (SSE)
 ```
 
 ---
 
-# 🏗️ Tech Stack
+# ⚙️ System Architecture
+
+```text
+                 Next.js Frontend
+                        │
+                        ▼
+              Express + TypeScript API
+                        │
+     ┌──────────────────┼─────────────────┐
+     ▼                  ▼                 ▼
+ MongoDB Atlas       Redis Cache       BullMQ
+(Vector Search)     (Embeddings)    (Background Jobs)
+     │                                   │
+     └──────────────► Gemini AI ◄────────┘
+```
+
+---
+
+# 🛠 Tech Stack
 
 ## Frontend
 
 - Next.js 16
 - React 19
 - TypeScript
-- TailwindCSS
+- Tailwind CSS
 - Axios
 - React Hot Toast
+- Lucide Icons
 
 ---
 
@@ -111,7 +153,7 @@ Final Answer
 - Node.js
 - Express.js
 - TypeScript
-- MongoDB
+- MongoDB Atlas
 - Mongoose
 - JWT
 - bcrypt
@@ -123,7 +165,17 @@ Final Answer
 ## AI
 
 - Google Gemini 2.5 Flash
-- Google Embedding API
+- Gemini Embedding API
+- Retrieval-Augmented Generation (RAG)
+
+---
+
+## Infrastructure
+
+- Redis
+- BullMQ
+- Server-Sent Events (SSE)
+- MongoDB Atlas Vector Search
 
 ---
 
@@ -133,12 +185,12 @@ Final Answer
 - Supertest
 - MongoDB Memory Server
 
-Backend Test Coverage
+### Backend Test Coverage
 
-- **83% Statements**
-- **70% Branches**
-- **73% Functions**
-- **82% Lines**
+- ✅ Statements: **83%**
+- ✅ Branches: **70%**
+- ✅ Functions: **73%**
+- ✅ Lines: **82%**
 
 ---
 
@@ -152,7 +204,7 @@ Backend Test Coverage
 
 # 📂 Project Structure
 
-```
+```text
 student-copilot
 │
 ├── frontend
@@ -162,14 +214,19 @@ student-copilot
 │
 ├── backend
 │   ├── src
-│   │   ├── controllers
-│   │   ├── middleware
-│   │   ├── models
-│   │   ├── routes
-│   │   ├── services
-│   │   ├── utils
-│   │   └── tests
 │   │
+│   ├── controllers
+│   ├── middleware
+│   ├── models
+│   ├── routes
+│   ├── services
+│   │   ├── ai
+│   │   ├── cache
+│   │   └── bullmq
+│   │
+│   ├── jobs
+│   ├── utils
+│   ├── tests
 │   ├── Dockerfile
 │   └── package.json
 │
@@ -179,12 +236,12 @@ student-copilot
 
 ---
 
-# ⚙️ Installation
+# 🚀 Installation
 
 Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/student-copilot.git
+git clone https://github.com/Vishalnerd/student-copilot.git
 
 cd student-copilot
 ```
@@ -217,13 +274,9 @@ npm run dev
 
 # 🐳 Docker
 
-Build and start both services
-
 ```bash
 docker compose up --build
 ```
-
-Application
 
 Frontend
 
@@ -240,8 +293,6 @@ http://localhost:5000
 ---
 
 # 🧪 Running Tests
-
-Backend
 
 ```bash
 cd backend
@@ -264,6 +315,8 @@ npm run test:coverage
 ```env
 PORT=5000
 
+NODE_ENV=development
+
 MONGO_URI=
 
 JWT_ACCESS_SECRET=
@@ -271,6 +324,8 @@ JWT_ACCESS_SECRET=
 JWT_REFRESH_SECRET=
 
 GEMINI_API_KEY=
+
+REDIS_URL=
 
 FRONTEND_URL=http://localhost:3000
 ```
@@ -289,24 +344,13 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api
 
 - Password Hashing (bcrypt)
 - HTTP-only Cookies
+- JWT Authentication
 - Refresh Token Rotation
 - Hashed Refresh Tokens
-- Route Protection
+- Protected Routes
 - Rate Limiting
 - Input Validation
 - Secure Authentication Flow
-
----
-
-# 📈 CI/CD
-
-GitHub Actions automatically
-
-- Install Dependencies
-- Build Backend
-- Run Jest Tests
-- Build Frontend
-- Validate Every Pull Request
 
 ---
 
@@ -324,7 +368,7 @@ GitHub Actions automatically
 
 ---
 
-## Chat
+## AI Chat
 
 <img width="1912" height="875" alt="chat" src="https://github.com/user-attachments/assets/3a197bea-1217-461d-a8ee-6d6fd1924dc5" />
 
@@ -342,14 +386,15 @@ GitHub Actions automatically
 
 ---
 
-# 🚀 Future Improvements
+# 🚀 Roadmap
 
-- Redis Caching
-- Swagger API Documentation
+- Cloudinary/S3 PDF Storage
+- Hybrid Search (BM25 + Vector Search)
+- Conversation Memory
+- AI Study Planner
 - Email Verification
 - Password Reset
-- AI Study Planner
-- AI Note Recommendations
+- Swagger API Documentation
 - Deployment Pipeline
 - Kubernetes
 
@@ -359,15 +404,11 @@ GitHub Actions automatically
 
 **Vishal Tanwar**
 
-- GitHub: https://github.com/Vishalnerd/student-copilot 🎓 Student Copilot
+- GitHub: https://github.com/Vishalnerd
+- LinkedIn: https://linkedin.com/in/vishal-tanwar-a7076a286/
 
-An AI-powered study assistant that transforms PDF notes into interactive learning experiences using **RAG (Retrieval-Augmented Generation)**, **Google Gemini AI**, and **MongoDB Vector Search**.
-
-Students can upload lecture notes, ask questions about their documents, generate AI summaries, flashcards, quizzes, and monitor their study progress through a dashboard.
+---
 
 # ⭐ Support
 
 If you found this project useful, consider giving it a ⭐ on GitHub.
-
-- LinkedIn: https://linkedin.com/in/vishal-tanwar-a7076a286/
-- GitHub: https://github.com/Vishalnerd
