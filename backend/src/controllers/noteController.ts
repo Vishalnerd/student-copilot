@@ -5,7 +5,7 @@ import Chat from "../models/Chat";
 import { Request, Response } from "express";
 import cloudinary from "../config/cloudinary";
 import { pdfQueue } from "../jobs/pdfQueue";
-import {uploadPdf} from "../services/cloudStorage/cloudinaryService"
+import {uploadPdf,deletePdf} from "../services/cloudStorage/cloudinaryService"
 import { AuthRequest } from "../middleware/authMiddleware";
 
 
@@ -137,9 +137,8 @@ export const deleteNote = async (
     }
 
     // Delete PDF from Cloudinary
-    await cloudinary.uploader.destroy(note.cloudinaryId,{
-      resource_type: "raw",
-    });
+    await deletePdf(note.cloudinaryId);
+
 
     // Delete Note
     await Note.findByIdAndDelete(note._id);

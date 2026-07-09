@@ -1,7 +1,6 @@
 import request from "supertest";
 import bcrypt from "bcryptjs";
-import fs from "fs";
-
+import {deletePdf} from "../../services/cloudStorage/cloudinaryService"
 import app from "../../app";
 
 import User from "../../models/user";
@@ -18,9 +17,11 @@ describe("Delete Note API", () => {
   let cookies: string;
   let noteId: string;
   let userId: string;
-  let fileUrl: string;
 
   beforeEach(async () => {
+
+    const fileUrl =
+  "https://res.cloudinary.com/demo/raw/upload/v1/delete.pdf";
 
     const password =
       await bcrypt.hash(
@@ -57,11 +58,6 @@ describe("Delete Note API", () => {
 
     cookies =
       login.headers["set-cookie"];
-
-    fileUrl =
-      "./uploads/Delete.pdf";
-
-    
 
     const note =
       await Note.create({
@@ -110,19 +106,14 @@ describe("Delete Note API", () => {
   });
 
   afterEach(() => {
-
-    if (
-      fs.existsSync(fileUrl)
-    ) {
-      fs.unlinkSync(fileUrl);
-    }
+    jest.clearAllMocks();
+    
 
   });
 
-  it("should delete note", async () => {
+  it("should delete cloudinary file", async () => {
 
-    const response =
-      await request(app)
+    await request(app)
 
         .delete(`/api/notes/${noteId}`)
 
@@ -130,9 +121,9 @@ describe("Delete Note API", () => {
           "Cookie",
           cookies
         );
-
-    expect(response.status)
-      .toBe(200);
+    const mockedDeletePdf = deletePdf as jest.Mock;
+    expect(mockedDeletePdf)
+      .toHaveBeenCalledWith("delete-id");
 
   });
 
@@ -199,22 +190,6 @@ describe("Delete Note API", () => {
 
   });
 
-  it("should delete uploaded file", async () => {
-
-    await request(app)
-
-      .delete(`/api/notes/${noteId}`)
-
-      .set(
-        "Cookie",
-        cookies
-      );
-
-    expect(
-      fs.existsSync(fileUrl)
-    ).toBe(false);
-
-  });
 
   it("should return 404", async () => {
 
