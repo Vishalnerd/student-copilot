@@ -53,8 +53,7 @@ export default function Steps() {
                   </h4>
 
                   <p className="mt-1 text-sm sm:text-xs font-medium leading-relaxed text-gray-500 dark:text-gray-400">
-                    Drag and drop your PDFs, lecture recordings, or handwritten
-                    notes with OCR support.
+                    Drag and drop your PDFs, Chat with your AI tutor, and generate summaries, quizzes, and flashcards instantly.
                   </p>
                 </div>
               </div>

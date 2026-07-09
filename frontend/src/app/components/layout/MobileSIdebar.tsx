@@ -77,18 +77,7 @@ export default function MobileSidebar({ trigger }: MobileSidebarProps) {
 
           {/* 🚀 Dynamic Scroll Workspace Section for Mobile Viewports */}
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* Mobile New Chat Action Button */}
-            <div className="px-4 pt-4 pb-2 flex-shrink-0">
-              <SheetClose asChild>
-                <button
-                  onClick={() => router.push("/notes")}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-blue-700 cursor-pointer active:scale-[0.98]"
-                >
-                  <Plus className="h-4 w-4 stroke-[2.5]" />
-                  New Chat
-                </button>
-              </SheetClose>
-            </div>
+
 
             {/* Scrollable Center containing Recent Chats Feed */}
             <div className="flex-1 overflow-y-auto px-2 pb-4 border-b border-gray-100 dark:border-gray-900/60 [&::-webkit-scrollbar]:w-1">

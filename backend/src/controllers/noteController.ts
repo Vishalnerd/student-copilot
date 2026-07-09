@@ -3,10 +3,9 @@ import Note from "../models/note";
 import NoteChunk from "../models/NoteChunk";
 import Chat from "../models/Chat";
 import { Request, Response } from "express";
-import fs from "fs";
-import  extractPdfText  from "../utils/extractPdfText";
+import cloudinary from "../config/cloudinary";
 import { pdfQueue } from "../jobs/pdfQueue";
-import chunkText from "../utils/chunkText";
+import {uploadPdf} from "../services/cloudStorage/cloudinaryService"
 import { AuthRequest } from "../middleware/authMiddleware";
 
 
@@ -22,11 +21,13 @@ export const uploadNote = async (
         message: "No file uploaded",
       });
     }
-
+    const uploadResult = await uploadPdf(file.path);
+    console.log("Cloudinary upload result:", uploadResult);
     const note = await Note.create({
       userId: req.userId,
       fileName: file.originalname,
-      filePath: file.path,
+      fileUrl: uploadResult.secure_url,
+      cloudinaryId:uploadResult.public_id,
       status: "processing",
     });
 
@@ -135,10 +136,10 @@ export const deleteNote = async (
       });
     }
 
-    // Delete PDF from disk
-    if (fs.existsSync(note.filePath)) {
-      fs.unlinkSync(note.filePath);
-    }
+    // Delete PDF from Cloudinary
+    await cloudinary.uploader.destroy(note.cloudinaryId,{
+      resource_type: "raw",
+    });
 
     // Delete Note
     await Note.findByIdAndDelete(note._id);

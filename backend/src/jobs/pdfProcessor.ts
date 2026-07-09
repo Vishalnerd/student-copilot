@@ -1,13 +1,13 @@
 import Note from "../models/note";
 import NoteChunk from "../models/NoteChunk";
-
+import fs from "fs/promises";
 import extractPdfText from "../utils/extractPdfText";
 import chunkText from "../utils/chunkText";
 
 import {
   generateBatchEmbeddingsWithRetry,
 } from "../services/ai/embeddingService";
-
+import {downloadPdf} from "../utils/downloadPdf";
 import { progressManager } from "../services/bullmq/progressManager";
 
 export const processPdf = async (noteId: string) => {
@@ -26,9 +26,9 @@ export const processPdf = async (noteId: string) => {
     });
     
     console.log(`📄 Extracting text from note ${noteId}`);
-    
-    const content = await extractPdfText(note.filePath);
-
+    const tempFilePath = await downloadPdf(note.fileUrl, noteId);
+    const content = await extractPdfText(tempFilePath);
+    await fs.unlink(tempFilePath);
     progressManager.send(noteId, {
       status: "chunking",
       progress: 20,

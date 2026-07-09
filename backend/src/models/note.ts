@@ -1,6 +1,5 @@
 import mongoose,
 {
- Document,
  Schema,
 } from "mongoose";
 
@@ -20,7 +19,11 @@ const NoteSchema =
      required: true,
    },
 
-   filePath: {
+   fileUrl: {
+     type: String,
+     required: true,
+   },
+   cloudinaryId: {
      type: String,
      required: true,
    },
