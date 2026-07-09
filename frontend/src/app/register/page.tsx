@@ -33,14 +33,25 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [mounted, setMounted] = useState(false); // 💡 Tracks hydration mounts to block layout shifts
+  const [mounted, setMounted] = useState(false);
 
-  // 1. Force immediate mounting context to eliminate server-side hydration delay
+  // 💡 Mobile Fail-Fast State: Bypasses script hangs if session evaluation takes too long
+  const [forceShowForm, setForceShowForm] = useState(false);
+
   useEffect(() => {
     setMounted(true);
+
+    // 💡 Mobile Performance Optimization:
+    // If auth state validation doesn't explicitly resolve within 400ms,
+    // display the registration form inputs anyway to keep mobile UX completely fluid.
+    const timer = setTimeout(() => {
+      setForceShowForm(true);
+    }, 400);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  // 2. Redirect authenticated users cleanly away from auth forms
+  // Redirect authenticated users cleanly away from auth forms
   useEffect(() => {
     if (mounted && !authLoading && user) {
       router.replace("/dashboard");
@@ -97,10 +108,10 @@ export default function RegisterPage() {
     }
   };
 
-  // 3. 💡 THE SPEED FIX: Stop trapping users on the loading screen! 
-  // If the browser hasn't completed mounting, or if the cookies are being read 
-  // but NO valid logged-in user session exists, let them view the registration form immediately.
-  if (!mounted || (authLoading && !user)) {
+  // 💡 Optimized Mobile Check Condition Rule
+  const isVerifyingSession = !mounted || (authLoading && !user && !forceShowForm);
+
+  if (isVerifyingSession) {
     return (
       <div className="min-h-screen bg-[#faf8ff] flex flex-col items-center justify-center space-y-3 px-4">
         <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
@@ -147,7 +158,7 @@ export default function RegisterPage() {
                   disabled={loading}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 py-3 pl-11 pr-4 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
                 />
               </div>
             </div>
@@ -168,7 +179,7 @@ export default function RegisterPage() {
                   disabled={loading}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 py-3 pl-11 pr-4 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
                 />
               </div>
             </div>
@@ -189,7 +200,7 @@ export default function RegisterPage() {
                   disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 py-3 pl-11 pr-11 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full rounded-lg border border-gray-200 bg-slate-50 py-3 pl-11 pr-11 text-sm text-black placeholder-gray-400 shadow-inner transition-all focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10"
                 />
                 <button
                   type="button"

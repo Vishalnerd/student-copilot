@@ -22,7 +22,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [mounted, setMounted] = useState(false); // 💡 Tracks hydration mounts to block layout shift
+  const [mounted, setMounted] = useState(false);
+
+  // 💡 Mobile Fail-Fast State: If a session check takes too long, we bypass the block
+  const [forceShowForm, setForceShowForm] = useState(false);
 
   const {
     loginWithPassword,
@@ -34,12 +37,20 @@ export default function LoginPage() {
   const router = useRouter();
   const isDisabled = loading || googleLoading;
 
-  // 1. Force immediately mounting context to eliminate Next.js server-side hydration delays
   useEffect(() => {
     setMounted(true);
+
+    // 💡 Mobile Performance Optimization:
+    // If the auth hook doesn't confirm a valid session within 400ms,
+    // immediately show the form anyway so mobile users aren't trapped on a spinner.
+    const timer = setTimeout(() => {
+      setForceShowForm(true);
+    }, 400);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  // 2. Redirect authenticated users cleanly
+  // Redirect authenticated users cleanly
   useEffect(() => {
     if (mounted && !authLoading && user) {
       router.replace("/dashboard");
@@ -79,11 +90,10 @@ export default function LoginPage() {
     }
   };
 
-  // 3. 💡 THE CRITICAL SPEED FIX: Bypasses the hanging fullscreen overlay block 
-  // If the browser hasn't mounted yet or if it's verifying a live cookie token,
-  // we check if a 'user' exists. If no user is found, we show the login form immediately
-  // instead of keeping the user trapped on the spinner.
-  if (!mounted || (authLoading && !user)) {
+  // 💡 Optimized Mobile Check: Show the form if forceShowForm hits true OR if auth explicitly finishes
+  const isVerifyingSession = !mounted || (authLoading && !user && !forceShowForm);
+
+  if (isVerifyingSession) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc] px-4 gap-3">
         <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
@@ -218,6 +228,7 @@ export default function LoginPage() {
                   text="continue_with"
                   shape="pill"
                   width="350"
+                // 💡 Hint: set size to 'medium' programmatically on smaller break-points if the button clip drops
                 />
               </div>
             </div>
