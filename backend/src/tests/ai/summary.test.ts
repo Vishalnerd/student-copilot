@@ -76,6 +76,8 @@ describe("Summary API", () => {
 
         fileUrl: "/tmp/java.pdf",
 
+        cloudinaryId: "java-id",
+
         content:
           "Java is an object oriented programming language.",
 

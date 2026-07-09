@@ -83,6 +83,7 @@ describe("Quiz API", () => {
         userId,
         fileName: "java.pdf",
         fileUrl: "/tmp/java.pdf",
+        cloudinaryId: "java-id",
         content:
           "Java is an object oriented programming language.",
       });

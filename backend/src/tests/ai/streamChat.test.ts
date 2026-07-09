@@ -53,6 +53,7 @@ describe("POST /api/notes/:id/stream - Real-time SSE Stream Engine Suite", () =>
       userId,
       fileName: "sample.pdf",
       fileUrl: "/uploads/sample.pdf",
+      cloudinaryId: "sample-id",
       status: "completed",
     });
     noteId = noteDocument._id.toString();

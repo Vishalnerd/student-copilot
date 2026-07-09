@@ -13,6 +13,15 @@ jest.mock("../../jobs/pdfQueue", () => ({
     add: jest.fn().mockResolvedValue({ id: "mock-job-id" }),
   },
 }));
+jest.mock(
+    "../../services/cloudStorage/cloudinaryService",
+    () => ({
+        uploadPdf: jest.fn().mockResolvedValue({
+            secure_url: "https://cloudinary/test.pdf",
+            public_id: "sample-id",
+        }),
+    })
+);
 
 describe("Upload Note API (BullMQ Orchestrator)", () => {
   let cookies: string;

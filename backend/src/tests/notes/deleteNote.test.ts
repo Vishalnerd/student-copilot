@@ -9,6 +9,10 @@ import Note from "../../models/note";
 import NoteChunk from "../../models/NoteChunk";
 import Chat from "../../models/Chat";
 
+jest.mock("../../services/cloudStorage/cloudinaryService", () => ({
+  deletePdf: jest.fn().mockResolvedValue({}),
+}));
+
 describe("Delete Note API", () => {
 
   let cookies: string;
@@ -55,12 +59,9 @@ describe("Delete Note API", () => {
       login.headers["set-cookie"];
 
     fileUrl =
-      "/tmp/delete.pdf";
+      "./uploads/Delete.pdf";
 
-    fs.writeFileSync(
-      fileUrl,
-      "dummy"
-    );
+    
 
     const note =
       await Note.create({
@@ -70,6 +71,8 @@ describe("Delete Note API", () => {
         fileName: "Delete.pdf",
 
         fileUrl,
+
+        cloudinaryId: "delete-id",
 
         content: "Delete Me",
 

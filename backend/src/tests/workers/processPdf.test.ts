@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 import Note from "../../models/note";
 import NoteChunk from "../../models/NoteChunk";
@@ -5,7 +6,20 @@ import { processPdf } from "../../jobs/pdfProcessor";
 import extractPdfText from "../../utils/extractPdfText";
 import { generateBatchEmbeddingsWithRetry } from "../../services/ai/embeddingService";
 import { progressManager } from "../../services/bullmq/progressManager";
-
+import {downloadPdf} from "../../utils/downloadPdf";
+import chunkText from "../../utils/chunkText";
+jest.mock("../../utils/chunkText");
+const mockedChunkText = chunkText as jest.Mock;
+mockedChunkText.mockReturnValue([
+  "Chunk 1",
+  "Chunk 2",
+]);
+jest.mock("../../utils/downloadPdf", () => ({
+  downloadPdf: jest.fn(),
+}));
+jest.mock("fs/promises", () => ({
+  unlink: jest.fn().mockResolvedValue(undefined),
+}));
 // 💡 Fix the keyPrefix crash by providing a structurally compatible ioredis mock
 jest.mock("ioredis", () => {
   return jest.fn().mockImplementation(() => {
@@ -17,6 +31,8 @@ jest.mock("ioredis", () => {
     };
   });
 });
+
+
 
 // Mock out heavy extraction operations, progress dispatchers and remote network APIs
 jest.mock("../../utils/extractPdfText");
@@ -39,6 +55,9 @@ describe("BullMQ Worker: processPdf() Pipeline", () => {
   let mockUserId: string;
 
   beforeEach(async () => {
+    (downloadPdf as jest.Mock).mockResolvedValue(
+    "/tmp/test.pdf"
+    );
     await Note.deleteMany({});
     await NoteChunk.deleteMany({});
     jest.clearAllMocks();
@@ -50,6 +69,7 @@ describe("BullMQ Worker: processPdf() Pipeline", () => {
       userId: mockUserId,
       fileName: "sample.pdf",
       fileUrl: "/uploads/sample.pdf",
+      cloudinaryId: "sample-id",
       status: "processing",
     });
     

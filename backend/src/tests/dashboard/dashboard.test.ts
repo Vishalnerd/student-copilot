@@ -104,6 +104,8 @@ describe("Dashboard API", () => {
 
         fileUrl: "/tmp/java.pdf",
 
+        cloudinaryId: "java-id",
+
         content: "Java",
 
       });
@@ -116,6 +118,8 @@ describe("Dashboard API", () => {
         fileName: "Node.pdf",
 
         fileUrl: "/tmp/node.pdf",
+
+        cloudinaryId: "node-id",
 
         content: "Node",
 
@@ -239,6 +243,8 @@ describe("Dashboard API", () => {
       fileName: "Other.pdf",
 
       fileUrl: "/tmp/other.pdf",
+
+      cloudinaryId: "other-id",
 
       content: "Other",
 
