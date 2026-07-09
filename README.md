@@ -184,7 +184,7 @@ student-copilot
 Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/student-copilot.git
+git clone https://github.com/Vishalnerd/student-copilot.git
 
 cd student-copilot
 ```
